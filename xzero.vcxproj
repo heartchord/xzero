@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\file.h" />
+    <ClInclude Include="include\list.h" />
+    <ClInclude Include="include\list_gnuc_x86.h" />
+    <ClInclude Include="include\list_msc_x86.h" />
+    <ClInclude Include="include\mempool.h" />
     <ClInclude Include="include\pattern.h" />
     <ClInclude Include="include\public.h" />
     <ClInclude Include="include\xzero.h" />
@@ -87,6 +91,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>./include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

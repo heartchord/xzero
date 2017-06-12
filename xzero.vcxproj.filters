@@ -23,6 +23,18 @@
     <ClInclude Include="include\pattern.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\mempool.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\list.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\list_msc_x86.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\list_gnuc_x86.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">

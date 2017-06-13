@@ -47,16 +47,177 @@
 /* pointer              4                    8                  4                8       */
 /* size_t               4                    8                  4                8       */
 /*---------------------------------------------------------------------------------------*/
-#ifdef KG_PLATFORM_WINDOWS                                          // windows platform
-#else                                                               // linux platform
-typedef unsigned char           BYTE;       // 1 bytes
-typedef unsigned short          WORD;       // 2 bytes
-typedef unsigned int            DWORD;      // 4 bytes
-typedef int                     LONG;       // 4 bytes
-typedef int                     BOOL;       // 4 bytes
-typedef signed long long        INT64;      // 8 bytes
-typedef unsigned long long      UINT64;     // 8 bytes
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+#else                                                                   // linux platform
+    typedef unsigned char       BYTE;                                   // 1 bytes
+    typedef unsigned short      WORD;                                   // 2 bytes
+    typedef unsigned int        DWORD;                                  // 4 bytes
+    typedef int                 LONG;                                   // 4 bytes
+    typedef int                 BOOL;                                   // 4 bytes
+    typedef signed long long    INT64;                                  // 8 bytes
+    typedef unsigned long long  UINT64;                                 // 8 bytes
 #endif // KG_PLATFORM_WINDOWS
+
+// Macro : KG_DISABLE_WARNING
+#undef  KG_DISABLE_WARNING
+#ifdef _MSC_VER                                                         // ms vc++
+    #define KG_DISABLE_WARNING(code, expression)        \
+        __pragma(warning(push))                         \
+        __pragma(warning(disable:code)) expression      \
+        __pragma(warning(pop))
+#else                                                                   // gcc
+    #define KG_DISABLE_WARNING(code, expression)        \
+        expression
+#endif // _MSC_VER
+
+// Macro : KG_WHILE_FALSE_NO_WARNING
+#undef  KG_WHILE_FALSE_NO_WARNING
+#define KG_WHILE_FALSE_NO_WARNING KG_DISABLE_WARNING(4127, while(false))
+
+// Macro : KG_PROCESS_ERROR_Q
+#undef  KG_PROCESS_ERROR_Q
+#define KG_PROCESS_ERROR_Q(condition)                   \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            goto Exit0;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+// Macro : KG_PROCESS_ERROR
+#undef  KG_PROCESS_ERROR
+#define KG_PROCESS_ERROR(condition)                     \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            KG_ASSERT(false);                           \
+            goto Exit0;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+#undef  KG_PROCESS_ERROR_RET_CODE_Q
+#define KG_PROCESS_ERROR_RET_CODE_Q(condition, ret)     \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            nResult = ret;                              \
+            goto Exit0;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+#undef  KG_PROCESS_ERROR_RET_CODE
+#define KG_PROCESS_ERROR_RET_CODE(condition, ret)       \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            nResult = ret;                              \
+            goto Exit0;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+#undef  KG_PROCESS_SUCCESS
+#define KG_PROCESS_SUCCESS(condition)                   \
+    do                                                  \
+    {                                                   \
+        if (condition)                                  \
+        {                                               \
+            goto Exit1;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+#undef  KG_PROCESS_C_STR_ERROR_Q
+#define KG_PROCESS_C_STR_ERROR_Q(s)                     \
+    KG_PROCESS_ERROR_Q(NULL != s && '\0' != s[0])
+
+#undef  KG_PROCESS_C_STR_ERROR
+#define KG_PROCESS_C_STR_ERROR(s)                       \
+    KG_PROCESS_ERROR(NULL != s && '\0' != s[0])
+
+#undef  KG_PROCESS_PTR_ERROR_Q
+#define KG_PROCESS_PTR_ERROR_Q(p)                       \
+    KG_PROCESS_ERROR_Q(NULL != p)
+
+#undef  KG_PROCESS_PTR_ERROR
+#define KG_PROCESS_PTR_ERROR(p)                         \
+    KG_PROCESS_ERROR(NULL != p)
+
+#undef  KG_CHECK_RET_CODE_Q
+#define KG_CHECK_RET_CODE_Q(condition, ret)             \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            return ret;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+// Macro : KG_CHECK_RET_CODE
+#undef  KG_CHECK_RET_CODE
+#define KG_CHECK_RET_CODE(condition, ret)               \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            KG_ASSERT(false);                           \
+            return ret;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+// Macro : KG_CHECK_RET_VOID_Q
+#undef  KG_CHECK_RET_VOID_Q
+#define KG_CHECK_RET_VOID_Q(condition)                  \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            return ;                                    \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+// Macro : KG_CHECK_RET_VOID
+#undef  KG_CHECK_RET_VOID
+#define KG_CHECK_RET_VOID(condition)                    \
+    do                                                  \
+    {                                                   \
+        if (!(condition))                               \
+        {                                               \
+            KG_ASSERT(false);                           \
+            return ;                                    \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+// Macro       : KG_FetchFieldSize
+// Description : fetch the size of the field in a struct or class.
+// Param       : type  - class or struct name
+//               field - member variable name
+#undef  KG_FetchFieldSize
+#define KG_FetchFieldSize(type, field) sizeof(((type *)0)->field)
+
+// Macro       : KG_FetchFieldOffset
+// Description : fetch the offset of the field in a struct or class.
+// Param       : type  - class or struct name
+//               field - member variable name
+#undef  KG_FetchFieldOffset
+#define KG_FetchFieldOffset(type, field) ((ULONG_PTR)&((type *)0)->field)
+
+// Macro       : KG_FetchAddressByField
+// Description : fetch the address of a class or struct instance by one member variable of
+//               the instance.
+// Param       : address - the address of member variable instance
+//               type    - class or struct name
+//               field   - member variable name
+#undef  KG_FetchAddressByField
+#ifdef KG_PLATFORM_WINDOWS
+    #define KG_FetchAddressByField(address, type, field) CONTAINING_RECORD(address, type, field)
+#else
+    #define KG_FetchAddressByField(address, type, field) \
+        ((type *)((char *)(address) - KG_FetchFieldOffset(type, field)))
+
+#endif
 
 namespace xzero 
 {

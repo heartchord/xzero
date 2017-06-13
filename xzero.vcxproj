@@ -21,14 +21,13 @@
   <ItemGroup>
     <ClInclude Include="include\file.h" />
     <ClInclude Include="include\list.h" />
-    <ClInclude Include="include\list_gnuc_x86.h" />
-    <ClInclude Include="include\list_msc_x86.h" />
     <ClInclude Include="include\mempool.h" />
     <ClInclude Include="include\pattern.h" />
     <ClInclude Include="include\public.h" />
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\list.cpp" />
     <ClCompile Include="source\pattern.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

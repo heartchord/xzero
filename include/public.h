@@ -30,6 +30,7 @@
     /*------------------------------------------------------------------------------*/
     #define _WIN32_WINNT 0x0500
     #include <windows.h>
+    #include <assert.h>
 #else                                                                   // linux platform
 #endif // KG_PLATFORM_WINDOWS
 
@@ -79,3 +80,9 @@ namespace xzero
         KG_UnConstructable &operator=(const KG_UnConstructable &) {}    // copy assignment
     };
 }
+
+#ifdef _DEBUG
+    #define KG_ASSERT(x) assert(x)
+#else
+    #define KG_ASSERT(x) 0
+#endif

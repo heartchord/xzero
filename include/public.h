@@ -58,6 +58,12 @@
     typedef unsigned long long  UINT64;                                 // 8 bytes
 #endif // KG_PLATFORM_WINDOWS
 
+#undef  KG_NAMESPACE_BEGIN
+#define KG_NAMESPACE_BEGIN(ns) namespace ns {
+
+#undef  KG_NAMESPACE_END
+#define KG_NAMESPACE_END }
+
 // Macro : KG_DISABLE_WARNING
 #undef  KG_DISABLE_WARNING
 #ifdef _MSC_VER                                                         // ms vc++
@@ -219,8 +225,8 @@
 
 #endif
 
-namespace xzero 
-{
+KG_NAMESPACE_BEGIN(xzero)
+
     class KG_UnCopyable
     {
     protected:
@@ -240,7 +246,8 @@ namespace xzero
         KG_UnConstructable(const KG_UnConstructable &) {}               // copy constructor
         KG_UnConstructable &operator=(const KG_UnConstructable &) {}    // copy assignment
     };
-}
+
+KG_NAMESPACE_END
 
 #ifdef _DEBUG
     #define KG_ASSERT(x) assert(x)

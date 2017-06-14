@@ -1,7 +1,7 @@
 #include "list.h"
 
-namespace xzero
-{
+KG_NAMESPACE_BEGIN(xzero)
+
 #if (defined(_MSC_VER) || defined(__ICL))                               // ms compiler or intel compiler
 
 /*------------------------------------------------------------------------------------------------------------------*/
@@ -212,7 +212,7 @@ inline PKG_InterlockedListNode KG_PopNode(PKG_InterlockedListHead pListHead)
 }
 #endif
 
-PKG_InterlockedListHead KG_InitializeInterlockedList(PKG_InterlockedListHead pListHead)
+PKG_InterlockedListHead KG_InitInterlockedList(PKG_InterlockedListHead pListHead)
 {
     if (!pListHead)
     {
@@ -236,4 +236,4 @@ PKG_InterlockedListNode KG_PopNodeFromInterlockedList(PKG_InterlockedListHead pL
     return KG_PopNode(pListHead);
 }
 
-}
+KG_NAMESPACE_END

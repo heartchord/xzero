@@ -25,7 +25,7 @@ typedef union KG_InterlockedListHead
 
 #pragma pack(pop)                                                           // reset to saved alignment
 
-PKG_InterlockedListHead KG_InitInterlockedList (PKG_InterlockedListHead pListHead = NULL);
+PKG_InterlockedListHead KG_InitInterlockedList       (PKG_InterlockedListHead pListHead = NULL);
 PKG_InterlockedListNode KG_PushNodeToInterlockedList (PKG_InterlockedListHead pListHead, PKG_InterlockedListNode pListNode);
 PKG_InterlockedListNode KG_PopNodeFromInterlockedList(PKG_InterlockedListHead pListHead);
 

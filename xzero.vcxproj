@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\atomic.h" />
+    <ClInclude Include="include\debug.h" />
     <ClInclude Include="include\file.h" />
     <ClInclude Include="include\list.h" />
     <ClInclude Include="include\mempool.h" />
@@ -27,6 +29,7 @@
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\debug.cpp" />
     <ClCompile Include="source\list.cpp" />
     <ClCompile Include="source\mempool.cpp" />
     <ClCompile Include="source\pattern.cpp" />

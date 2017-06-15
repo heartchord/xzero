@@ -32,6 +32,7 @@ unsigned int g_uDefaultMemBlockSizeArray[] =
 };
 
 const unsigned int g_uDefaultMemBlockSizeArraySize = sizeof(g_uDefaultMemBlockSizeArray) / sizeof(g_uDefaultMemBlockSizeArray[0]);
+static KG_MemoryPool<g_uDefaultMemBlockSizeArraySize, g_uDefaultMemBlockSizeArray> g_DefaultMemoryPool;
 
 static inline bool KG_CompareMemBlockList(const KG_MemBlockList &lhs, const KG_MemBlockList &rhs)
 {
@@ -143,7 +144,7 @@ Exit0:
     return nResult;
 }
 
-PKG_MemBlock KG_AllocateMemBlock(unsigned uListArraySize, PKG_MemBlockList pListArray, unsigned uRequiredSize)
+PKG_MemBlock KG_AllocateMemBlock(unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uRequiredSize)
 {
     int                     nRetCode   = false;
     unsigned int            uEachSize  = 0;
@@ -191,6 +192,42 @@ Exit1:
 
 Exit0:
     return pResult;
+}
+
+int KG_RecycleMemBlock(unsigned int uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock)
+{
+    int                     nResult       = false;
+    int                     nRetCode      = false;
+    unsigned int            uRequiredSize = 0;
+    unsigned int            uEachSize     = 0;
+    PKG_InterlockedListHead pListHead     = NULL;
+
+    // parameters check
+    KG_PROCESS_ERROR(NULL != pRecycledBlock && "You're trying to recycle a 0-byte memory block into memory pool.");
+    KG_PROCESS_ERROR_Q(uListArraySize > 0);
+    KG_PROCESS_PTR_ERROR_Q(pListArray);
+
+    uRequiredSize = pRecycledBlock->m_uSize;
+    KG_PROCESS_ERROR(uRequiredSize > 0);
+
+    nRetCode = KG_FindMemBlockList(uListArraySize, pListArray, uRequiredSize, &pListHead, &uEachSize);
+    KG_PROCESS_ERROR_Q(nRetCode);
+
+    if (!pListHead) // uRequiredSize > All KG_MemBlockList.m_uEachSize, just delete it when recycling.
+    { // just delete it.
+        delete[](unsigned char *)pRecycledBlock;
+        KG_PROCESS_SUCCESS(true);
+    }
+
+    // do recycle operation.
+    pRecycledBlock->m_uSize = 0;
+    KG_PushNodeToInterlockedList(pListHead, &(pRecycledBlock->m_Node));
+
+Exit1:
+    pRecycledBlock = NULL;
+    nResult        = true;
+Exit0:
+    return nResult;
 }
 
 KG_NAMESPACE_END

@@ -29,6 +29,12 @@
     <ClInclude Include="include\list.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\atomic.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">
@@ -38,6 +44,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\mempool.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\debug.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "list.h"
+#include "debug.h"
+
+#include <atomic>
 
 KG_NAMESPACE_BEGIN(xzero)
 
@@ -27,8 +30,97 @@ typedef struct KG_MemBlockList
 
 #pragma pack(pop)                                                           // reset to saved alignment
 
-int KG_InitMemBlockListArray  (unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uSizeArraySize, unsigned int *pSizeArray);
-int KG_UnInitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pListArray);
-PKG_MemBlock KG_AllocateMemBlock(unsigned uListArraySize, PKG_MemBlockList pListArray, unsigned uRequiredSize);
+int          KG_InitMemBlockListArray  (unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uSizeArraySize, unsigned int *pSizeArray);
+int          KG_UnInitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pListArray);
+PKG_MemBlock KG_AllocateMemBlock       (unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uRequiredSize);
+int          KG_RecycleMemBlock        (unsigned int uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock);
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+class KG_MemoryPool : public KG_UnCopyable
+{
+public:
+    KG_MemoryPool();
+    ~KG_MemoryPool();
+
+public:
+    void * Get(unsigned int uRequiredSize);
+    int    Put(void *pvMemBlock);
+
+private:
+    std::atomic<long> m_lGetTimes;
+    std::atomic<long> m_lPutTimes;
+    KG_MemBlockList   m_pListArray[uSizeArraySize];
+};
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+KG_MemoryPool<uSizeArraySize, pSizeArray>::KG_MemoryPool()
+{
+    int nRetCode = false;
+
+    KG_ASSERT(uSizeArraySize > 0);
+    KG_ASSERT(NULL != pSizeArray);
+
+    m_lGetTimes = 0;
+    m_lPutTimes = 0;
+
+    nRetCode = KG_InitMemBlockListArray(uSizeArraySize, m_pListArray, uSizeArraySize, pSizeArray);
+    KG_ASSERT(nRetCode);
+}
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+KG_MemoryPool<uSizeArraySize, pSizeArray>::~KG_MemoryPool()
+{
+    int nRetCode = false;
+
+    nRetCode = KG_UnInitMemBlockListArray(uSizeArraySize, m_pListArray);
+    KG_ASSERT(nRetCode);
+    KG_ASSERT(m_lGetTimes == m_lPutTimes && "[ERROR] Memory Pool : memory block leak detected!");
+
+    if (m_lGetTimes != m_lPutTimes)
+    {
+        KG_DebugPrintln("[ERROR] Memory Pool : memory block leak detected, leaked block num - [%d]", m_lGetTimes - m_lPutTimes);
+    }
+}
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+void * KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(unsigned int uRequiredSize)
+{
+    int          nRetCode  = false;
+    void *       pvResult  = NULL;
+    PKG_MemBlock pMemBlock = NULL;
+
+    KG_PROCESS_ERROR_Q(uRequiredSize > 0);
+
+    pMemBlock = KG_AllocateMemBlock(uSizeArraySize, m_pListArray, uRequiredSize);
+    KG_PROCESS_PTR_ERROR_Q(pMemBlock);
+
+    m_lGetTimes++;
+    pvResult = (void *)pMemBlock->m_pData;
+
+Exit0:
+    return pvResult;
+}
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+int KG_MemoryPool<uSizeArraySize, pSizeArray>::Put(void *pvMemBlock)
+{
+    int          nResult   = false;
+    int          nRetCode  = false;
+    PKG_MemBlock pMemBlock = NULL;
+
+    KG_PROCESS_PTR_ERROR_Q(pvMemBlock);
+
+    pMemBlock = KG_FetchAddressByField(pvMemBlock, KG_MemBlock, m_pData);
+    KG_ASSERT(NULL != pMemBlock);
+
+    nRetCode = KG_RecycleMemBlock(uSizeArraySize, m_pListArray, pMemBlock);
+    KG_PROCESS_ERROR_Q(nRetCode);
+
+    m_lPutTimes++;
+
+    nResult = true;
+Exit0:
+    return nResult;
+}
 
 KG_NAMESPACE_END

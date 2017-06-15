@@ -230,4 +230,14 @@ Exit0:
     return nResult;
 }
 
+int KG_GetFromDefaultMemPool(void ** ppMemBlock, unsigned int uRequiredSize)
+{
+    return g_DefaultMemoryPool.Get(ppMemBlock, uRequiredSize);
+}
+
+int KG_PutIntoDefaultMemPool(void ** ppMemBlock)
+{
+    return g_DefaultMemoryPool.Put(ppMemBlock);
+}
+
 KG_NAMESPACE_END

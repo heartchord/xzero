@@ -43,8 +43,8 @@ public:
     ~KG_MemoryPool();
 
 public:
-    void * Get(unsigned int uRequiredSize);
-    int    Put(void *pvMemBlock);
+    int Get(void ** ppMemBlock, unsigned int uRequiredSize);
+    int Put(void ** ppMemBlock);
 
 private:
     std::atomic<long> m_lGetTimes;
@@ -83,44 +83,54 @@ KG_MemoryPool<uSizeArraySize, pSizeArray>::~KG_MemoryPool()
 }
 
 template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
-void * KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(unsigned int uRequiredSize)
-{
-    int          nRetCode  = false;
-    void *       pvResult  = NULL;
-    PKG_MemBlock pMemBlock = NULL;
-
-    KG_PROCESS_ERROR_Q(uRequiredSize > 0);
-
-    pMemBlock = KG_AllocateMemBlock(uSizeArraySize, m_pListArray, uRequiredSize);
-    KG_PROCESS_PTR_ERROR_Q(pMemBlock);
-
-    m_lGetTimes++;
-    pvResult = (void *)pMemBlock->m_pData;
-
-Exit0:
-    return pvResult;
-}
-
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
-int KG_MemoryPool<uSizeArraySize, pSizeArray>::Put(void *pvMemBlock)
+int KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(void ** ppMemBlock, unsigned int uRequiredSize)
 {
     int          nResult   = false;
     int          nRetCode  = false;
     PKG_MemBlock pMemBlock = NULL;
 
-    KG_PROCESS_PTR_ERROR_Q(pvMemBlock);
+    KG_PROCESS_ERROR_Q(uRequiredSize > 0);
+    KG_PROCESS_PTR_ERROR_Q(ppMemBlock);
 
-    pMemBlock = KG_FetchAddressByField(pvMemBlock, KG_MemBlock, m_pData);
+    *ppMemBlock = NULL;
+
+    pMemBlock = KG_AllocateMemBlock(uSizeArraySize, m_pListArray, uRequiredSize);
+    KG_PROCESS_PTR_ERROR_Q(pMemBlock);
+
+    *ppMemBlock = (void *)pMemBlock->m_pData;
+
+    m_lGetTimes++;
+    nResult = true;
+Exit0:
+    return nResult;
+}
+
+template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+int KG_MemoryPool<uSizeArraySize, pSizeArray>::Put(void ** ppMemBlock)
+{
+    int          nResult   = false;
+    int          nRetCode  = false;
+    PKG_MemBlock pMemBlock = NULL;
+
+    KG_PROCESS_PTR_ERROR_Q(ppMemBlock);
+    KG_PROCESS_PTR_ERROR_Q(*ppMemBlock);
+
+    pMemBlock = KG_FetchAddressByField(*ppMemBlock, KG_MemBlock, m_pData);
     KG_ASSERT(NULL != pMemBlock);
 
     nRetCode = KG_RecycleMemBlock(uSizeArraySize, m_pListArray, pMemBlock);
     KG_PROCESS_ERROR_Q(nRetCode);
 
-    m_lPutTimes++;
+    *ppMemBlock = NULL;
 
+    m_lPutTimes++;
     nResult = true;
 Exit0:
     return nResult;
 }
+
+int KG_GetFromDefaultMemPool(void ** ppMemBlock, unsigned int uRequiredSize);
+int KG_PutIntoDefaultMemPool(void ** ppMemBlock);
+
 
 KG_NAMESPACE_END

@@ -49,5 +49,8 @@
     <ClCompile Include="source\debug.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\file.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

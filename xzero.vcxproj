@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\debug.cpp" />
+    <ClCompile Include="source\file.cpp" />
     <ClCompile Include="source\list.cpp" />
     <ClCompile Include="source\mempool.cpp" />
     <ClCompile Include="source\pattern.cpp" />

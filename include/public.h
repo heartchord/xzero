@@ -32,6 +32,7 @@
     #include <windows.h>
 
     #include <stdio.h>
+    #include <stdlib.h>
     #include <assert.h>
 #else                                                                   // linux platform
 #endif // KG_PLATFORM_WINDOWS

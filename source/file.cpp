@@ -1,6 +1,8 @@
 #include "file.h"
 #include "debug.h"
 
+# pragma warning(disable: 4996)
+
 KG_NAMESPACE_BEGIN(xzero)
 
 int KG_OpenFileSafely(FILE *&fp, const char * const cszFile, const char * const cszMode)
@@ -10,7 +12,7 @@ int KG_OpenFileSafely(FILE *&fp, const char * const cszFile, const char * const 
     KG_PROCESS_C_STR_ERROR(cszFile);
     KG_PROCESS_C_STR_ERROR(cszMode);
 
-    KG_PROCESS_ERROR(NULL == fp && "[ERROR] The file handle has been used!");
+    KG_PROCESS_ERROR(NULL == fp && "[ERROR] File handle has been used!");
     fp = ::fopen(cszFile, cszMode);
     KG_PROCESS_ERROR(NULL != fp && "[ERROR] Open file failed!");
 
@@ -28,8 +30,8 @@ int KG_CloseFileSafely(FILE *&fp)
 
     nRetCode = ::fclose(fp);
     KG_PROCESS_ERROR(0 == nRetCode);
-
     fp = NULL;
+
 Exit1:
     nResult = true;
 Exit0:
@@ -51,9 +53,6 @@ int KG_File::Open(const char * const cszFile, const char * const cszMode)
     int nRetCode = false;
 
     m_bBinaryFile = false;
-
-    KG_PROCESS_C_STR_ERROR(cszFile);
-    KG_PROCESS_C_STR_ERROR(cszMode);
 
     nRetCode = KG_OpenFileSafely(m_hFile, cszFile, cszMode);
     KG_PROCESS_ERROR(nRetCode);
@@ -114,7 +113,7 @@ LONG KG_File::Size() const
     KG_PROCESS_ERROR(0 == nRetCode);
 
     lCurPos = ::ftell(m_hFile);
-    KG_PROCESS_ERROR(-1 != lOriPos);
+    KG_PROCESS_ERROR(-1 != lCurPos);
 
     nRetCode = ::fseek(m_hFile, lOriPos, SEEK_SET);
     KG_PROCESS_ERROR(0 == nRetCode);
@@ -249,8 +248,9 @@ LONG KG_File::ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
 {
     LONG   lResult    = -1;
     int    nRetCode   = 0;
+    int    nCurPos    = 0;
     LONG   lReadBytes = -1;
-    char * pStr       = NULL;
+    char * pTextLine  = NULL;
     char * pNewLine   = NULL;
 
     KG_PROCESS_PTR_ERROR(cpBuff);
@@ -258,26 +258,89 @@ LONG KG_File::ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
     KG_PROCESS_ERROR(!m_bBinaryFile);
     KG_PROCESS_ERROR(lBuffSize > 0 && lReadSize > 0 && lReadSize <= lBuffSize);
 
-    pStr     = ::fgets(cpBuff, lReadSize, m_hFile);
-    nRetCode = ::ferror(m_hFile);
+    pTextLine = ::fgets(cpBuff, lReadSize, m_hFile);
+    nRetCode  = ::ferror(m_hFile);
 
     KG_PROCESS_ERROR(0 == nRetCode);
-    if (NULL == pStr || '\0' == pStr[0])
-    {
+    if (NULL == pTextLine || '\0' == pTextLine[0])
+    { // empty string
         lReadBytes = 0;
         KG_PROCESS_SUCCESS(true);
     }
 
-    lReadBytes = ::strnlen(pStr, lReadSize);
-    pNewLine   = &cpBuff[lReadBytes - 1];
-    if ('\n' == *pNewLine)
+    // process '\r' and '\n' :  mac - '\r', unix - '\n', windows - '\r\n'
+    lReadBytes = ::strnlen(pTextLine, lReadSize);
+    nCurPos    = lReadBytes - 1;
+
+    for (; nCurPos >= 0; nCurPos--)
     {
-        *pNewLine = '\0';
-        --lReadBytes;
+        if ('\r' != cpBuff[nCurPos] && '\n' != cpBuff[nCurPos])
+        {
+            break;
+        }
+
+        cpBuff[nCurPos] = '\0';
+        lReadBytes--;
     }
 
 Exit1:
     lResult = lReadBytes;
+Exit0:
+    return lResult;
+}
+
+LONG KG_File::Write(const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize)
+{
+    LONG lResult     = -1;
+    LONG lWriteBytes = -1;
+
+    KG_PROCESS_PTR_ERROR(m_hFile);
+    KG_PROCESS_PTR_ERROR(cpcBuff);
+    KG_PROCESS_ERROR(lBuffSize > 0 && lWriteSize > 0 && lWriteSize <= lBuffSize);
+
+    lWriteBytes = ::fwrite(cpcBuff, 1, lWriteSize, m_hFile);
+    KG_PROCESS_ERROR(lWriteBytes <= lWriteSize);
+
+    lResult = lWriteBytes;
+Exit0:
+    return lResult;
+}
+
+LONG KG_File::WriteLine(const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize)
+{
+    LONG lResult     = -1;
+    int  nRetCode    = 0;
+    LONG lWriteBytes = -1;
+
+    lWriteBytes = Write(cpcBuff, lBuffSize, lWriteSize);
+    KG_PROCESS_ERROR(-1 != lWriteBytes);
+
+    nRetCode = ::fprintf(m_hFile, "\r\n");
+    KG_PROCESS_ERROR(nRetCode > 0);
+
+    lResult = lWriteBytes;
+Exit0:
+    return lResult;
+}
+
+LONG KG_File::WriteTextLine(const char * const cszText, LONG lTextSize, LONG lWriteSize)
+{
+    LONG lResult     = -1;
+    int  nRetCode    = 0;
+    LONG lWriteBytes = -1;
+
+    KG_PROCESS_PTR_ERROR(m_hFile);
+    KG_PROCESS_PTR_ERROR(cszText);
+    KG_PROCESS_ERROR(!m_bBinaryFile);
+    KG_PROCESS_ERROR(lTextSize > 0 && lWriteSize > 0 && lWriteSize <= lTextSize);
+
+    lWriteBytes = ::fwrite(cszText, 1, lWriteSize, m_hFile);
+    KG_PROCESS_ERROR(lWriteBytes <= lWriteSize);
+
+    nRetCode = ::fprintf(m_hFile, "\r\n");
+    KG_PROCESS_ERROR(nRetCode > 0);
+
+    lResult = lWriteBytes;
 Exit0:
     return lResult;
 }

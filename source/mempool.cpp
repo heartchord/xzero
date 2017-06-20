@@ -58,7 +58,11 @@ static inline int KG_UnInitMemBlockList(PKG_InterlockedListHead pListHead)
         }
 
         pMemBlock = KG_FetchAddressByField(pListNode, KG_MemBlock, m_Node);
-        delete[](BYTE *)pMemBlock;
+    //#ifdef _DEBUG
+    //    printf("KG_UnInitMemBlockList() pMemBlock = %X\n", pMemBlock);
+    //#endif
+
+        delete[](unsigned char *)pMemBlock;
     }
 
     nResult = true;

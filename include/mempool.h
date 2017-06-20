@@ -97,7 +97,15 @@ int KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(void ** ppMemBlock, unsigned 
     pMemBlock = KG_AllocateMemBlock(uSizeArraySize, m_pListArray, uRequiredSize);
     KG_PROCESS_PTR_ERROR_Q(pMemBlock);
 
+//#ifdef _DEBUG
+//    printf("KG_MemoryPool::Get() pMemBlock   = %X\n", pMemBlock);
+//#endif
+
     *ppMemBlock = (void *)pMemBlock->m_pData;
+
+//#ifdef _DEBUG
+//    printf("KG_MemoryPool::Get() *ppMemBlock = %X\n", *ppMemBlock);
+//#endif
 
     m_lGetTimes++;
     nResult = true;
@@ -115,8 +123,16 @@ int KG_MemoryPool<uSizeArraySize, pSizeArray>::Put(void ** ppMemBlock)
     KG_PROCESS_PTR_ERROR_Q(ppMemBlock);
     KG_PROCESS_PTR_ERROR_Q(*ppMemBlock);
 
+//#ifdef _DEBUG
+    //printf("KG_MemoryPool::Put() *ppMemBlock = %X\n", *ppMemBlock);
+//#endif
+
     pMemBlock = KG_FetchAddressByField(*ppMemBlock, KG_MemBlock, m_pData);
     KG_ASSERT(NULL != pMemBlock);
+
+//#ifdef _DEBUG
+//    printf("KG_MemoryPool::Put() pMemBlock   = %X\n", pMemBlock);
+//#endif
 
     nRetCode = KG_RecycleMemBlock(uSizeArraySize, m_pListArray, pMemBlock);
     KG_PROCESS_ERROR_Q(nRetCode);

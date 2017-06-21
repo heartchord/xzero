@@ -18,6 +18,7 @@
 
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
     // define WIN32_LEAN_AND_MEAN to exclude APIs such as Cryptography, DDE, RPC, Shell and Windows Sockets.
+    #undef  WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
     /*------------------------------------------------------------------------------*/
     /* [ windows 8, windows 8.1                            ] _WIN32_WINNT >= 0x0602 */
@@ -28,6 +29,7 @@
     /* [ windows 2000                                      ] _WIN32_WINNT >= 0x0500 */
     /* [ windows nt 4.0     ] _WIN32_WINNT >= 0x0400                                */
     /*------------------------------------------------------------------------------*/
+    #undef  _WIN32_WINNT
     #define _WIN32_WINNT 0x0500
     #include <windows.h>
 
@@ -230,24 +232,33 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-    class KG_UnCopyable
-    {
-    protected:
-        KG_UnCopyable() {}                                              // constructor
-        ~KG_UnCopyable() {}                                             // destructor
-    private:
-        KG_UnCopyable(const KG_UnCopyable &) {}                         // copy constructor
-        KG_UnCopyable &operator=(const KG_UnCopyable &) {}              // copy assignment
-    };
+class KG_UnCopyable
+{
+protected:
+    KG_UnCopyable() {}                                                  // constructor
+    ~KG_UnCopyable() {}                                                 // destructor
+private:
+    KG_UnCopyable(const KG_UnCopyable &) {}                             // copy constructor
+    KG_UnCopyable &operator=(const KG_UnCopyable &) {}                  // copy assignment
+};
 
-    class KG_UnConstructable
+class KG_UnConstructable
+{
+protected:
+    ~KG_UnConstructable() {}                                            // destructor
+private:
+    KG_UnConstructable() {}                                             // constructor
+    KG_UnConstructable(const KG_UnConstructable &) {}                   // copy constructor
+    KG_UnConstructable &operator=(const KG_UnConstructable &) {}        // copy assignment
+};
+
+template <class T>
+inline void KG_ZeroMemory(const T * const p, const size_t nBytes)
+{
+    if (NULL != p)
     {
-    protected:
-        ~KG_UnConstructable() {}                                        // destructor
-    private:
-        KG_UnConstructable() {}                                         // constructor
-        KG_UnConstructable(const KG_UnConstructable &) {}               // copy constructor
-        KG_UnConstructable &operator=(const KG_UnConstructable &) {}    // copy assignment
-    };
+        ::memset((void *)p, 0, nBytes);
+    }
+}
 
 KG_NAMESPACE_END

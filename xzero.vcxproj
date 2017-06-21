@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\atomic.h" />
-    <ClInclude Include="include\debug.h" />
-    <ClInclude Include="include\file.h" />
-    <ClInclude Include="include\list.h" />
-    <ClInclude Include="include\mempool.h" />
-    <ClInclude Include="include\pattern.h" />
-    <ClInclude Include="include\public.h" />
+    <ClInclude Include="include\internal\atomic.h" />
+    <ClInclude Include="include\internal\debug.h" />
+    <ClInclude Include="include\internal\file.h" />
+    <ClInclude Include="include\internal\list.h" />
+    <ClInclude Include="include\internal\mempool.h" />
+    <ClInclude Include="include\internal\pattern.h" />
+    <ClInclude Include="include\internal\public.h" />
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
   <ItemGroup>
@@ -97,7 +97,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>./include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\include\internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

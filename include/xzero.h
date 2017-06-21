@@ -1,4 +1,6 @@
 #pragma once
 
-#include "pattern.h"
-#include "mempool.h"
+#include "internal/file.h"
+#include "internal/atomic.h"
+#include "internal/mempool.h"
+#include "internal/pattern.h"

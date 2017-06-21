@@ -9,31 +9,34 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="include\internal">
+      <UniqueIdentifier>{3ebf70b6-8889-4339-b3a5-bb9911c9f7f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\public.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\xzero.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\file.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\atomic.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\pattern.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\debug.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\mempool.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\file.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\list.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\list.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\atomic.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\mempool.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\debug.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\internal\pattern.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\internal\public.h">
+      <Filter>include\internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

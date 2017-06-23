@@ -53,10 +53,12 @@
 /* size_t               4                    8                  4                8       */
 /*---------------------------------------------------------------------------------------*/
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    typedef unsigned int        UINT32;                                 // 4 bytes
 #else                                                                   // linux platform
     typedef unsigned char       BYTE;                                   // 1 bytes
     typedef unsigned short      WORD;                                   // 2 bytes
     typedef unsigned int        DWORD;                                  // 4 bytes
+    typedef unsigned int        UINT32;                                 // 4 bytes
     typedef int                 LONG;                                   // 4 bytes
     typedef int                 BOOL;                                   // 4 bytes
     typedef signed long long    INT64;                                  // 8 bytes

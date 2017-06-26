@@ -13,7 +13,7 @@ KG_NAMESPACE_BEGIN(xzero)
 typedef struct KG_MemBlock
 {
     KG_InterlockedListNode m_Node;                                          // interlocked list node
-    unsigned int           m_uSize;                                         // required size of memory block
+    UINT32                 m_uSize;                                         // required size of memory block
     BYTE                   m_pData[1];                                      // data buffer
 }*PKG_MemBlock;
 
@@ -24,18 +24,18 @@ typedef struct KG_MemBlock
 
 typedef struct KG_MemBlockList
 {
-    unsigned int           m_uEachSize;                                     // the size of each memory block in this list
+    UINT32                 m_uEachSize;                                     // the size of each memory block in this list
     KG_InterlockedListHead m_Head;                                          // interlocked list head
 }*PKG_MemBlockList;
 
 #pragma pack(pop)                                                           // reset to saved alignment
 
-int          KG_InitMemBlockListArray  (unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uSizeArraySize, unsigned int *pSizeArray);
-int          KG_UnInitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pListArray);
-PKG_MemBlock KG_AllocateMemBlock       (unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uRequiredSize);
-int          KG_RecycleMemBlock        (unsigned int uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock);
+int          KG_InitMemBlockListArray  (UINT32 uListArraySize, PKG_MemBlockList pListArray, UINT32 uSizeArraySize, UINT32 *pSizeArray);
+int          KG_UnInitMemBlockListArray(UINT32 uListArraySize, PKG_MemBlockList pListArray);
+PKG_MemBlock KG_AllocateMemBlock       (UINT32 uListArraySize, PKG_MemBlockList pListArray, UINT32 uRequiredSize);
+int          KG_RecycleMemBlock        (UINT32 uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock);
 
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+template <UINT32 uSizeArraySize, UINT32 pSizeArray[]>
 class KG_MemoryPool : public KG_UnCopyable
 {
 public:
@@ -43,7 +43,7 @@ public:
     ~KG_MemoryPool();
 
 public:
-    int Get(void ** ppMemBlock, unsigned int uRequiredSize);
+    int Get(void ** ppMemBlock, UINT32 uRequiredSize);
     int Put(void ** ppMemBlock);
 
 private:
@@ -52,7 +52,7 @@ private:
     KG_MemBlockList   m_pListArray[uSizeArraySize];
 };
 
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+template <UINT32 uSizeArraySize, UINT32 pSizeArray[]>
 KG_MemoryPool<uSizeArraySize, pSizeArray>::KG_MemoryPool()
 {
     int nRetCode = false;
@@ -67,7 +67,7 @@ KG_MemoryPool<uSizeArraySize, pSizeArray>::KG_MemoryPool()
     KG_ASSERT(nRetCode);
 }
 
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+template <UINT32 uSizeArraySize, UINT32 pSizeArray[]>
 KG_MemoryPool<uSizeArraySize, pSizeArray>::~KG_MemoryPool()
 {
     int nRetCode = false;
@@ -82,8 +82,8 @@ KG_MemoryPool<uSizeArraySize, pSizeArray>::~KG_MemoryPool()
     }
 }
 
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
-int KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(void ** ppMemBlock, unsigned int uRequiredSize)
+template <UINT32 uSizeArraySize, UINT32 pSizeArray[]>
+int KG_MemoryPool<uSizeArraySize, pSizeArray>::Get(void ** ppMemBlock, UINT32 uRequiredSize)
 {
     int          nResult   = false;
     int          nRetCode  = false;
@@ -113,7 +113,7 @@ Exit0:
     return nResult;
 }
 
-template <unsigned int uSizeArraySize, unsigned int pSizeArray[]>
+template <UINT32 uSizeArraySize, UINT32 pSizeArray[]>
 int KG_MemoryPool<uSizeArraySize, pSizeArray>::Put(void ** ppMemBlock)
 {
     int          nResult   = false;
@@ -145,7 +145,7 @@ Exit0:
     return nResult;
 }
 
-int KG_GetFromDefaultMemPool(void ** ppMemBlock, unsigned int uRequiredSize);
+int KG_GetFromDefaultMemPool(void ** ppMemBlock, UINT32 uRequiredSize);
 int KG_PutIntoDefaultMemPool(void ** ppMemBlock);
 
 

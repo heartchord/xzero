@@ -4,7 +4,7 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-unsigned int g_uDefaultMemBlockSizeArray[] =
+UINT32 g_uDefaultMemBlockSizeArray[] =
 {
     1  * 8    + 32,
     2  * 8    + 32,
@@ -31,7 +31,7 @@ unsigned int g_uDefaultMemBlockSizeArray[] =
     64 * 1024 + 32
 };
 
-const unsigned int g_uDefaultMemBlockSizeArraySize = sizeof(g_uDefaultMemBlockSizeArray) / sizeof(g_uDefaultMemBlockSizeArray[0]);
+const UINT32 g_uDefaultMemBlockSizeArraySize = sizeof(g_uDefaultMemBlockSizeArray) / sizeof(g_uDefaultMemBlockSizeArray[0]);
 static KG_MemoryPool<g_uDefaultMemBlockSizeArraySize, g_uDefaultMemBlockSizeArray> g_DefaultMemoryPool;
 
 static inline bool KG_CompareMemBlockList(const KG_MemBlockList &lhs, const KG_MemBlockList &rhs)
@@ -70,8 +70,8 @@ Exit0:
     return nResult;
 }
 
-static inline int KG_FindMemBlockList(unsigned int uListArraySize, PKG_MemBlockList pListArray,
-    unsigned int uRequiredSize, KG_InterlockedListHead **ppListHead, unsigned int *pnEachSize)
+static inline int KG_FindMemBlockList(UINT32 uListArraySize, PKG_MemBlockList pListArray,
+    UINT32 uRequiredSize, KG_InterlockedListHead **ppListHead, UINT32 *pnEachSize)
 {
     int              nResult = false;
     PKG_MemBlockList pList   = NULL;
@@ -102,7 +102,7 @@ Exit0:
     return nResult;
 }
 
-int KG_InitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uSizeArraySize, unsigned int *pSizeArray)
+int KG_InitMemBlockListArray(UINT32 uListArraySize, PKG_MemBlockList pListArray, UINT32 uSizeArraySize, UINT32 *pSizeArray)
 {
     int nResult = false;
 
@@ -112,7 +112,7 @@ int KG_InitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pList
     KG_PROCESS_PTR_ERROR_Q(pSizeArray);
 
     // do initialization
-    for (unsigned int i = 0; i < uSizeArraySize; ++i)
+    for (UINT32 i = 0; i < uSizeArraySize; ++i)
     {
         KG_ASSERT(pSizeArray[i] > 0);                                   // we can't manage a memory block with 0-byte size
         pListArray[i].m_uEachSize = pSizeArray[i];
@@ -127,7 +127,7 @@ Exit0:
     return nResult;
 }
 
-int KG_UnInitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pListArray)
+int KG_UnInitMemBlockListArray(UINT32 uListArraySize, PKG_MemBlockList pListArray)
 {
     int nResult  = false;
     int nRetCode = false;
@@ -137,7 +137,7 @@ int KG_UnInitMemBlockListArray(unsigned int uListArraySize, PKG_MemBlockList pLi
     KG_PROCESS_PTR_ERROR_Q(pListArray);
 
     // do uninitialization
-    for (unsigned int i = 0; i < uListArraySize; ++i)
+    for (UINT32 i = 0; i < uListArraySize; ++i)
     {
         nRetCode = KG_UnInitMemBlockList(&(pListArray[i].m_Head));
         KG_ASSERT(nRetCode);
@@ -148,11 +148,11 @@ Exit0:
     return nResult;
 }
 
-PKG_MemBlock KG_AllocateMemBlock(unsigned int uListArraySize, PKG_MemBlockList pListArray, unsigned int uRequiredSize)
+PKG_MemBlock KG_AllocateMemBlock(UINT32 uListArraySize, PKG_MemBlockList pListArray, UINT32 uRequiredSize)
 {
     int                     nRetCode   = false;
-    unsigned int            uEachSize  = 0;
-    unsigned int            uAllocSize = 0;
+    UINT32            uEachSize  = 0;
+    UINT32            uAllocSize = 0;
     PKG_MemBlock            pResult    = NULL;
     PKG_MemBlock            pMemBlock  = NULL;
     PKG_InterlockedListHead pListHead  = NULL;
@@ -198,12 +198,12 @@ Exit0:
     return pResult;
 }
 
-int KG_RecycleMemBlock(unsigned int uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock)
+int KG_RecycleMemBlock(UINT32 uListArraySize, PKG_MemBlockList pListArray, PKG_MemBlock pRecycledBlock)
 {
     int                     nResult       = false;
     int                     nRetCode      = false;
-    unsigned int            uRequiredSize = 0;
-    unsigned int            uEachSize     = 0;
+    UINT32            uRequiredSize = 0;
+    UINT32            uEachSize     = 0;
     PKG_InterlockedListHead pListHead     = NULL;
 
     // parameters check
@@ -234,7 +234,7 @@ Exit0:
     return nResult;
 }
 
-int KG_GetFromDefaultMemPool(void ** ppMemBlock, unsigned int uRequiredSize)
+int KG_GetFromDefaultMemPool(void ** ppMemBlock, UINT32 uRequiredSize)
 {
     return g_DefaultMemoryPool.Get(ppMemBlock, uRequiredSize);
 }

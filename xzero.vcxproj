@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\internal\atomic.h" />
     <ClInclude Include="include\internal\debug.h" />
+    <ClInclude Include="include\internal\delegate.h" />
     <ClInclude Include="include\internal\file.h" />
     <ClInclude Include="include\internal\list.h" />
     <ClInclude Include="include\internal\mempool.h" />

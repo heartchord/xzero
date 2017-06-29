@@ -67,6 +67,28 @@ void KG_DebugMessageBox(const char *pMsg, ...)
 #endif // KG_PLATFORM_WINDOWS
 }
 
+void KG_PrintlnInHex(void *pvMsg, const size_t uBytes)
+{
+    bool           bResult = false;
+    unsigned char *p       = NULL;
+
+    KG_PROCESS_PTR_ERROR(pvMsg);
+    KG_PROCESS_ERROR(uBytes >= 0);
+
+    p = (unsigned char *)pvMsg;
+
+    for (size_t i = 0; i < uBytes; i++)
+    {
+        ::printf("%02X", p[i]);
+    }
+
+    ::printf("\n");
+
+    bResult = true;
+Exit0:
+    return;
+}
+
 void KG_AssertFailed(const char *pCondition, const char *pFileName, int nLineNum)
 {
     KG_DebugMessageBox("[ASSERT FAILED] : Condition - %s, File - %s, Line - %i", pCondition, pFileName, nLineNum);

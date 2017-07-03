@@ -74,12 +74,12 @@
 // Macro : KG_DISABLE_WARNING
 #undef  KG_DISABLE_WARNING
 #ifdef _MSC_VER                                                         // ms vc++
-    #define KG_DISABLE_WARNING(code, expression)        \
+#define KG_DISABLE_WARNING(code, expression)        \
         __pragma(warning(push))                         \
         __pragma(warning(disable:code)) expression      \
         __pragma(warning(pop))
 #else                                                                   // gcc
-    #define KG_DISABLE_WARNING(code, expression)        \
+#define KG_DISABLE_WARNING(code, expression)        \
         expression
 #endif // _MSC_VER
 
@@ -126,6 +126,18 @@
     do                                                  \
     {                                                   \
         if (!(condition))                               \
+        {                                               \
+            KG_ASSERT(false);                           \
+            nResult = ret;                              \
+            goto Exit0;                                 \
+        }                                               \
+    } KG_WHILE_FALSE_NO_WARNING
+
+#undef  KG_PROCESS_SUCCESS_RET_CODE
+#define KG_PROCESS_SUCCESS_RET_CODE(condition, ret)     \
+    do                                                  \
+    {                                                   \
+        if (condition)                                  \
         {                                               \
             nResult = ret;                              \
             goto Exit0;                                 \

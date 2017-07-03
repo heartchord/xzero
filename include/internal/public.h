@@ -53,12 +53,12 @@
 /* size_t               4                    8                  4                8       */
 /*---------------------------------------------------------------------------------------*/
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
-    typedef UINT32        UINT32;                                 // 4 bytes
+    typedef UINT32              UINT32;                                 // 4 bytes
 #else                                                                   // linux platform
     typedef unsigned char       BYTE;                                   // 1 bytes
     typedef unsigned short      WORD;                                   // 2 bytes
-    typedef UINT32        DWORD;                                  // 4 bytes
-    typedef UINT32        UINT32;                                 // 4 bytes
+    typedef UINT32              DWORD;                                  // 4 bytes
+    typedef UINT32              UINT32;                                 // 4 bytes
     typedef int                 LONG;                                   // 4 bytes
     typedef int                 BOOL;                                   // 4 bytes
     typedef signed long long    INT64;                                  // 8 bytes
@@ -74,12 +74,12 @@
 // Macro : KG_DISABLE_WARNING
 #undef  KG_DISABLE_WARNING
 #ifdef _MSC_VER                                                         // ms vc++
-#define KG_DISABLE_WARNING(code, expression)        \
+#define KG_DISABLE_WARNING(code, expression)            \
         __pragma(warning(push))                         \
         __pragma(warning(disable:code)) expression      \
         __pragma(warning(pop))
 #else                                                                   // gcc
-#define KG_DISABLE_WARNING(code, expression)        \
+#define KG_DISABLE_WARNING(code, expression)            \
         expression
 #endif // _MSC_VER
 

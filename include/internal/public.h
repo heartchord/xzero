@@ -241,8 +241,25 @@
 #else
     #define KG_FetchAddressByField(address, type, field) \
         ((type *)((char *)(address) - KG_FetchFieldOffset(type, field)))
-
 #endif
+
+#undef  KG_LOWORD
+#define KG_LOWORD(n)        ((WORD)(n))
+
+#undef  KG_HIWORD
+#define KG_HIWORD(n)        ((WORD)(((DWORD)(n) >> 16) & 0xFFFF))
+
+#undef  KG_LOBYTE
+#define KG_LOBYTE(n)        ((BYTE)(n))
+
+#undef  KG_HIBYTE
+#define KG_HIBYTE(n)        ((BYTE)(((WORD)(n) >> 8) & 0xFF))
+
+#undef  KG_MAKEWORD
+#define KG_MAKEWORD(l, h)   ((WORD)(((BYTE)(l)) | ((WORD)((BYTE)(h))) << 8))
+
+#undef  KG_MAKELONG
+#define KG_MAKELONG(l, h)   ((LONG)(((WORD)(l)) | ((DWORD)((WORD)(h))) << 16))
 
 KG_NAMESPACE_BEGIN(xzero)
 

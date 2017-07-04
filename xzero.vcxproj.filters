@@ -41,6 +41,12 @@
     <ClInclude Include="include\internal\delegate.h">
       <Filter>include\internal</Filter>
     </ClInclude>
+    <ClInclude Include="include\internal\frame.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\internal\time.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">
@@ -56,6 +62,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\file.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\frame.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\time.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

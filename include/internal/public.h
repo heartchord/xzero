@@ -53,7 +53,6 @@
 /* size_t               4                    8                  4                8       */
 /*---------------------------------------------------------------------------------------*/
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
-    typedef UINT32              UINT32;                                 // 4 bytes
 #else                                                                   // linux platform
     typedef unsigned char       BYTE;                                   // 1 bytes
     typedef unsigned short      WORD;                                   // 2 bytes

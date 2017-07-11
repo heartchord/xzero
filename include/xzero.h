@@ -1,5 +1,6 @@
 #pragma once
 
+#include "internal/code.h"
 #include "internal/file.h"
 #include "internal/atomic.h"
 #include "internal/mempool.h"

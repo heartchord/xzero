@@ -47,6 +47,12 @@
     <ClInclude Include="include\internal\time.h">
       <Filter>include\internal</Filter>
     </ClInclude>
+    <ClInclude Include="include\internal\code.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\internal\hash.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">
@@ -68,6 +74,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\time.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\code.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\hash.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

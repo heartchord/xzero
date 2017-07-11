@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\internal\atomic.h" />
+    <ClInclude Include="include\internal\code.h" />
     <ClInclude Include="include\internal\debug.h" />
     <ClInclude Include="include\internal\delegate.h" />
     <ClInclude Include="include\internal\file.h" />
     <ClInclude Include="include\internal\frame.h" />
+    <ClInclude Include="include\internal\hash.h" />
     <ClInclude Include="include\internal\list.h" />
     <ClInclude Include="include\internal\mempool.h" />
     <ClInclude Include="include\internal\pattern.h" />
@@ -32,9 +34,11 @@
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\code.cpp" />
     <ClCompile Include="source\debug.cpp" />
     <ClCompile Include="source\file.cpp" />
     <ClCompile Include="source\frame.cpp" />
+    <ClCompile Include="source\hash.cpp" />
     <ClCompile Include="source\list.cpp" />
     <ClCompile Include="source\mempool.cpp" />
     <ClCompile Include="source\pattern.cpp" />
@@ -103,6 +107,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\include\internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

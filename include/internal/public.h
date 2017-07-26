@@ -70,6 +70,13 @@
 #undef  KG_NAMESPACE_END
 #define KG_NAMESPACE_END }
 
+#undef  KG_UNREFERENCED_PARAMETER
+#ifdef  KG_PLATFORM_WINDOWS                                             // windows platform
+#define KG_UNREFERENCED_PARAMETER(p) UNREFERENCED_PARAMETER(p)
+#else                                                                   // linux   platform
+#define KG_UNREFERENCED_PARAMETER(p) (void)(p)
+#endif  // KG_UNREFERENCED_PARAMETER
+
 // Macro : KG_DISABLE_WARNING
 #undef  KG_DISABLE_WARNING
 #ifdef _MSC_VER                                                         // ms vc++

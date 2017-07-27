@@ -298,4 +298,22 @@ inline void KG_ZeroMemory(const T * const p, const size_t nBytes)
     }
 }
 
+inline void KG_MilliSleep(DWORD dwMilliseconds)
+{
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    ::Sleep(dwMilliseconds);
+#else                                                                   // linux   platform
+    ::usleep(dwMilliseconds * 1000);
+#endif // KG_PLATFORM_WINDOWS
+}
+
+inline void KG_Sleep(DWORD dwSeconds)
+{
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    ::Sleep(dwSeconds * 1000);
+#else                                                                   // linux   platform
+    ::sleep(dwSeconds);
+#endif // KG_PLATFORM_WINDOWS
+}
+
 KG_NAMESPACE_END

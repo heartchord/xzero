@@ -1,4 +1,5 @@
 #include "list.h"
+#include "debug.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 
@@ -234,6 +235,192 @@ PKG_InterlockedListNode KG_PushNodeToInterlockedList(PKG_InterlockedListHead pLi
 PKG_InterlockedListNode KG_PopNodeFromInterlockedList(PKG_InterlockedListHead pListHead)
 {
     return KG_PopNode(pListHead);
+}
+
+KG_ListNode::KG_ListNode()
+{
+    m_pNext = NULL;
+    m_pPrev = NULL;
+}
+
+KG_ListNode::~KG_ListNode()
+{
+}
+
+KG_ListNode *KG_ListNode::Next() const
+{
+    if (m_pNext && m_pNext->m_pNext)
+    { // next node exists and next node is not the tail node.
+        return m_pNext;
+    }
+
+    return NULL;
+}
+
+KG_ListNode *KG_ListNode::Prev() const
+{
+    if (m_pPrev && m_pPrev->m_pPrev)
+    { // prev node exists and prev node is not the head node.
+        return m_pPrev;
+    }
+
+    return NULL;
+}
+
+void KG_ListNode::InsertPrev(KG_ListNode *pNode)
+{
+    if (!pNode || !m_pPrev)
+    { // if inserted node is NULL or the node before current node is NULL.
+        KG_ASSERT(false);
+        return;
+    }
+
+    if (pNode->m_pNext || pNode->m_pPrev)
+    { // is inserted node is linked.
+        KG_ASSERT(false);
+        return;
+    }
+
+    // linked
+    pNode->m_pPrev   = m_pPrev;
+    pNode->m_pNext   = this;
+    m_pPrev->m_pNext = pNode;
+    m_pPrev          = pNode;
+}
+
+void KG_ListNode::InsertNext(KG_ListNode *pNode)
+{
+    if (!pNode || !m_pNext)
+    { // if inserted node is NULL or the node after current node is NULL.
+        KG_ASSERT(false);
+        return;
+    }
+
+    if (pNode->m_pNext || pNode->m_pPrev)
+    { // is inserted node is linked.
+        KG_ASSERT(false);
+        return;
+    }
+
+    // linked
+    pNode->m_pPrev   = this;
+    pNode->m_pNext   = m_pNext;
+    m_pNext->m_pPrev = pNode;
+    m_pNext          = pNode;
+}
+
+void KG_ListNode::Remove()
+{
+    if (!m_pPrev || !m_pNext)
+    {
+        KG_ASSERT(false);
+        return;
+    }
+
+    m_pPrev->m_pNext = m_pNext;
+    m_pNext->m_pPrev = m_pPrev;
+
+    m_pPrev = NULL;
+    m_pNext = NULL;
+}
+
+bool KG_ListNode::IsLinked() const
+{
+    return (m_pPrev && m_pNext);
+}
+
+KG_List::KG_List()
+{
+    m_Head.m_pNext = &m_Tail;
+    m_Tail.m_pPrev = &m_Head;
+}
+
+KG_List::~KG_List()
+{
+}
+
+KG_ListNode *KG_List::Front() const
+{
+    return m_Head.Next();
+}
+
+KG_ListNode *KG_List::Back() const
+{
+    return m_Tail.Prev();
+}
+
+void KG_List::PushFront(KG_ListNode *pNode)
+{
+    m_Head.InsertNext(pNode);
+}
+
+void KG_List::PushBack(KG_ListNode *pNode)
+{
+    m_Tail.InsertPrev(pNode);
+}
+
+KG_ListNode *KG_List::PopFront()
+{
+    KG_ListNode *pNode = m_Head.Next();
+
+    if (pNode)
+    {
+        pNode->Remove();
+    }
+
+    return pNode;
+}
+
+KG_ListNode* KG_List::PopBack()
+{
+    KG_ListNode *pNode = m_Tail.Prev();
+
+    if (pNode)
+    {
+        pNode->Remove();
+    }
+
+    return pNode;
+}
+
+bool KG_List::Empty() const
+{
+    return (m_Head.Next() == NULL);
+}
+
+UINT32 KG_List::Size() const
+{
+    UINT32       uSize = 0;
+    KG_ListNode *pNode = Front();
+
+    while (pNode)
+    {
+        pNode = pNode->Next();
+        uSize++;
+    }
+
+    return uSize;
+}
+
+KG_ListNode *KG_List::Advance(UINT32 uDistance) const
+{
+    UINT32       uCurDistance = 0;
+    KG_ListNode *pNode        = Front();
+    KG_ListNode *pTarget      = NULL;
+
+    while (pNode)
+    {
+        if (uCurDistance == uDistance)
+        {
+            pTarget = pNode;
+            break;
+        }
+
+        uCurDistance += 1;
+        pNode = pNode->Next();
+    }
+
+    return pTarget;
 }
 
 KG_NAMESPACE_END

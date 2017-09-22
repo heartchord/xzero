@@ -28,6 +28,7 @@
     <ClInclude Include="include\internal\hash.h" />
     <ClInclude Include="include\internal\list.h" />
     <ClInclude Include="include\internal\mempool.h" />
+    <ClInclude Include="include\internal\path.h" />
     <ClInclude Include="include\internal\pattern.h" />
     <ClInclude Include="include\internal\public.h" />
     <ClInclude Include="include\internal\time.h" />
@@ -41,6 +42,7 @@
     <ClCompile Include="source\hash.cpp" />
     <ClCompile Include="source\list.cpp" />
     <ClCompile Include="source\mempool.cpp" />
+    <ClCompile Include="source\path.cpp" />
     <ClCompile Include="source\pattern.cpp" />
     <ClCompile Include="source\time.cpp" />
   </ItemGroup>

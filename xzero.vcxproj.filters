@@ -56,6 +56,9 @@
     <ClInclude Include="include\internal\path.h">
       <Filter>include\internal</Filter>
     </ClInclude>
+    <ClInclude Include="include\internal\script.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">
@@ -86,6 +89,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\path.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\script.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

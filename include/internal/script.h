@@ -10,7 +10,10 @@
 #include <vector>
 
 #undef  KG_MAX_SCIRPT_NAME_LEN
-#define KG_MAX_SCIRPT_NAME_LEN 256
+#define KG_MAX_SCIRPT_NAME_LEN  256
+
+#undef  KG_LUA_SCRIPT_ID
+#define KG_LUA_SCRIPT_ID        "ScriptId"
 
 KG_NAMESPACE_BEGIN(xzero)
 
@@ -58,7 +61,15 @@ public:
     virtual ~KG_LuaScript();
 
 public:
-    bool LoadFromBuff(DWORD dwScriptID, const char *pcScriptName, const char *pcBuff, DWORD dwFileSize);
+    bool LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize);
+
+    // add global variable.
+    bool AddGlobalInteger(const char *pszVarName, int         nValue  );
+    bool AddGlobalString (const char *pszVarName, const char *pszValue);
+
+    // add local variable.
+    bool AddLocalInteger(DWORD dwScriptId, const char *pszVarName, int         nValue  );
+    bool AddLocalString (DWORD dwScriptId, const char *pszVarName, const char *pszValue);
 
 private:
     bool _AssociateScriptToLua(DWORD dwScriptID);
@@ -67,8 +78,7 @@ private:
     lua_State *         m_pLuaState;                                    // lua virtual machine instance.
     DWORD               m_dwActiveScriptId;                             // active lua script id.
     KG_LuaScriptInfoMap m_scriptInfoMap;                                // all lua script associated info map.
-    int                 m_nMTRef;                                       // the metatable reference.
-    int                 m_nGTRef;                                       // the global table reference.
+    int                 m_nMetaTableRIdx;                               // the metatable reference.
 };
 
 KG_NAMESPACE_END

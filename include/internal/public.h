@@ -267,6 +267,9 @@
 #undef  KG_MAKELONG
 #define KG_MAKELONG(l, h)   ((LONG)(((WORD)(l)) | ((DWORD)((WORD)(h))) << 16))
 
+#undef  KG_INVALID_STR2ID
+#define KG_INVALID_STR2ID   static_cast<DWORD>(-1)
+
 KG_NAMESPACE_BEGIN(xzero)
 
 class KG_UnCopyable

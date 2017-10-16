@@ -345,4 +345,10 @@ Exit0:
     return lResult;
 }
 
+KG_IniFile::KG_IniFile()
+{
+    m_lFileBuffOffset = 0;
+    m_pLatestSection  = NULL;
+}
+
 KG_NAMESPACE_END

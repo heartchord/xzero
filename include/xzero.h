@@ -2,6 +2,7 @@
 
 #include "internal/code.h"
 #include "internal/file.h"
+#include "internal/path.h"
 #include "internal/atomic.h"
 #include "internal/mempool.h"
 #include "internal/pattern.h"

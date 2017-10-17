@@ -1,42 +1,155 @@
 #include "path.h"
+#include "debug.h"
 
 KG_NAMESPACE_BEGIN(xzero)
+
+bool KG_IsDirExisted(const char * pszPath)
+{
+    bool        bResult     = false;
+    int         nRetCode    = 0;
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    DWORD       dwFileAttrs = 0;
+#else                                                                   // linux   platform
+    struct stat buf;
+#endif // KG_PLATFORM_WINDOWS
+
+    KG_PROCESS_C_STR_ERROR(pszPath);
+
+    nRetCode = ::_access(pszPath, 00);
+    KG_PROCESS_ERROR_Q(0 == nRetCode);
+
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+
+    dwFileAttrs = ::GetFileAttributes(pszPath);
+    KG_PROCESS_ERROR_Q(INVALID_FILE_ATTRIBUTES != dwFileAttrs);
+    KG_PROCESS_ERROR_Q(dwFileAttrs & FILE_ATTRIBUTE_DIRECTORY);
+
+#else                                                                   // linux   platform
+
+    nRetCode = ::stat(pszPath, &buf);
+    KG_PROCESS_ERROR_Q(0 == nRetCode);
+
+    nRetCode = S_ISDIR(buf.st_mode);
+    KG_PROCESS_ERROR_Q(nRetCode);
+
+#endif // KG_PLATFORM_WINDOWS
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IsFileExisted(const char * pszPath)
+{
+    bool        bResult     = false;
+    int         nRetCode    = 0;
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    DWORD       dwFileAttrs = 0;
+#else                                                                   // linux   platform
+    struct stat buf;
+#endif // KG_PLATFORM_WINDOWS
+
+    KG_PROCESS_C_STR_ERROR(pszPath);
+
+    nRetCode = ::_access(pszPath, 00);
+    KG_PROCESS_ERROR_Q(0 == nRetCode);
+
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+
+    dwFileAttrs = ::GetFileAttributes(pszPath);
+    KG_PROCESS_ERROR_Q(INVALID_FILE_ATTRIBUTES != dwFileAttrs);
+    KG_PROCESS_ERROR_Q((dwFileAttrs & FILE_ATTRIBUTE_ARCHIVE) | (dwFileAttrs & FILE_ATTRIBUTE_NORMAL));
+
+#else                                                                   // linux   platform
+
+    nRetCode = ::stat(pszPath, &buf);
+    KG_PROCESS_ERROR_Q(0 == nRetCode);
+
+    nRetCode = S_ISREG(buf.st_mode);
+    KG_PROCESS_ERROR_Q(nRetCode);
+
+#endif // KG_PLATFORM_WINDOWS
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
 
 bool KG_IsPathSeparator(int c)
 {
     return '/' == c || '\\' == c;
 }
 
+bool l_CreatePath(const char *pszDirPath)
+{
+    bool bResult  = false;
+    int  nRetCode = 0;
+
+    KG_PROCESS_PTR_ERROR(pszDirPath);
+    KG_PROCESS_SUCCESS('\0' == pszDirPath[0]);                          // empty directory
+
+    nRetCode = ::_access(pszDirPath, 00);
+    KG_PROCESS_SUCCESS(0 == nRetCode);                                  // directory exists
+
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+    nRetCode = ::CreateDirectory(pszDirPath, NULL);
+    KG_PROCESS_ERROR(nRetCode);
+#else                                                                   // linux   platform
+    nRetCode = ::mkdir(pszDirPath, 0777);
+    KG_PROCESS_ERROR(0 == nRetCode);
+#endif  // KG_PLATFORM_WINDOWS
+
+Exit1:
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
 bool KG_CreatePath(const char * pszPath)
 {
-    bool bResult = false;
-    int   nRetCode                           = 0;
-    char  pFullDirPath[KG_MAX_FILE_PATH_LEN] = {'\0'};                  // 全路径
-    char *pIter                              = pFullDirPath;
-    char  c                                  = 0;
+    bool  bResult                 = false;
+    int   nRetCode                = 0;
+    char  pPath[KG_MAX_FILE_PATH] = {'\0'};
+    char *pIter                   = pPath;
+    char  c                       = 0;
 
-    KG_CHECK_C_STR_RET_BOOL(cszDirPath);
-    ::strcpy(pFullDirPath, cszDirPath);                                 // 拷贝，防止cszDirPath为常量字符串
+    KG_PROCESS_C_STR_ERROR(pszPath);
+    ::strcpy(pPath, pszPath);
 
     while (*pIter)
     {
-        c = *pIter;                                                     // 缓存当前字符('/' or '\\')
+        c = *pIter;                                                     // current character
         if (KG_IsPathSeparator(c) && *(pIter + 1))
-        { // 如果最后一个字符是路径分隔符则不进行处理。
-          // 巧妙的算法：查找到路径分隔符，将分隔符变成'\0'截断字符串创建目录，然后将分隔符还原回来，这里充分利用了C类型字符串的特性。
+        {
             *pIter   = '\0';
-            nRetCode = _KG_CreateDir(pFullDirPath);
+            nRetCode = l_CreatePath(pPath);
             *pIter   = c;
-            KG_CHECK_RET_BOOL(nRetCode);
+            KG_PROCESS_ERROR(nRetCode);
         }
-
         pIter++;
     }
 
-    nRetCode = _KG_CreateDir(pFullDirPath);                             // 创建最后一级目录
-    KG_CHECK_RET_BOOL(nRetCode);
+    nRetCode = l_CreatePath(pPath);                                     // create last level directory
+    KG_PROCESS_ERROR(nRetCode);
 
-    return true;
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_DeleteFile(const char *pszPath)
+{
+    bool bResult  = false;
+    int  nRetCode = 0;
+
+    KG_PROCESS_C_STR_ERROR(pszPath);
+
+    nRetCode = ::remove(pszPath);
+    KG_PROCESS_ERROR(nRetCode);
+
+    bResult = true;
+Exit0:
+    return bResult;
 }
 
 KG_NAMESPACE_END

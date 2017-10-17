@@ -33,6 +33,7 @@
     #define _WIN32_WINNT 0x0500
     #include <windows.h>
 
+    #include <io.h>
     #include <stdio.h>
     #include <stdlib.h>
     #include <assert.h>
@@ -269,6 +270,22 @@
 
 #undef  KG_INVALID_STR2ID
 #define KG_INVALID_STR2ID   static_cast<DWORD>(-1)
+
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+
+#define KG_MAX_FILE_PATH    _MAX_PATH                                   // include '\0' character
+#define KG_MAX_FILE_NAME    _MAX_FNAME                                  // include '\0' character
+#define KG_MAX_FILE_EXT     _MAX_EXT                                    // include '\0' character
+#define KG_MAX_DIR_NAME     _MAX_DIR                                    // include '\0' character
+
+#else                                                                   // linux platform
+
+#define KG_MAX_FILE_PATH    PATH_MAX                                    // include '\0' character
+#define KG_MAX_FILE_NAME    (NAME_MAX + 1)                              // include '\0' character
+#define KG_MAX_FILE_EXT     (NAME_MAX + 1)                              // include '\0' character
+#define KG_MAX_DIR_NAME     (NAME_MAX + 1)                              // include '\0' character
+
+#endif // KG_PLATFORM_WINDOWS
 
 KG_NAMESPACE_BEGIN(xzero)
 

@@ -59,6 +59,12 @@
     <ClInclude Include="include\internal\script.h">
       <Filter>include\internal</Filter>
     </ClInclude>
+    <ClInclude Include="include\internal\str.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\internal\pointer.h">
+      <Filter>include\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\pattern.cpp">
@@ -92,6 +98,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\script.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\str.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pointer.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

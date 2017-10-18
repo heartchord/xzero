@@ -30,8 +30,10 @@
     <ClInclude Include="include\internal\mempool.h" />
     <ClInclude Include="include\internal\path.h" />
     <ClInclude Include="include\internal\pattern.h" />
+    <ClInclude Include="include\internal\pointer.h" />
     <ClInclude Include="include\internal\public.h" />
     <ClInclude Include="include\internal\script.h" />
+    <ClInclude Include="include\internal\str.h" />
     <ClInclude Include="include\internal\time.h" />
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
@@ -45,7 +47,9 @@
     <ClCompile Include="source\mempool.cpp" />
     <ClCompile Include="source\path.cpp" />
     <ClCompile Include="source\pattern.cpp" />
+    <ClCompile Include="source\pointer.cpp" />
     <ClCompile Include="source\script.cpp" />
+    <ClCompile Include="source\str.cpp" />
     <ClCompile Include="source\time.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -109,7 +113,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\include\internal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>

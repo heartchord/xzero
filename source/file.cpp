@@ -1,5 +1,8 @@
+#include "str.h"
+#include "hash.h"
 #include "file.h"
 #include "debug.h"
+#include "pointer.h"
 
 # pragma warning(disable: 4996)
 
@@ -347,8 +350,370 @@ Exit0:
 
 KG_IniFile::KG_IniFile()
 {
-    m_lFileBuffOffset = 0;
+    m_nFileBuffOffset = 0;
     m_pLatestSection  = NULL;
+}
+
+bool KG_IniFile::IsKeyNameChar(char c) const
+{
+    if ( (c >= 'A' && c <= 'Z') ||
+         (c >= 'a' && c <= 'z') ||
+         (c >= '0' && c <= '9') ||
+         (c == '$')             ||
+         (c == '.')             ||
+         (c == '_')             ||
+         (c == '-'))
+    {
+        return true;
+    }
+    return false;
+}
+
+char *KG_IniFile::SplitKeyValue(char *szLine) const
+{
+    char *pResult = NULL;
+    char *pIter   = szLine;
+
+    while (*pIter)
+    {
+        if ('=' == *pIter)
+        {
+            break;
+        }
+
+        pIter++;
+    }
+
+    KG_PROCESS_ERROR(*pIter && "[Error] It seems 'key=value' line lacks of '=' character!");
+
+    *pIter  = '\0';                                                     // '=' -> '\0'
+    pResult = pIter + 1;
+Exit0:
+    return pResult;
+}
+
+bool KG_IniFile::CreateIniLink(char *pBuff, int nBuffSize)
+{ // lBufferSize = lFileSize
+    bool  bResult                      = false;
+    int   nRetCode                     = 0;
+    char *pStrLine                     = NULL;
+    char *pKeyName                     = NULL;
+    char *pKeyValue                    = NULL;
+    char  pSecName[KG_MAX_INI_SEC_LEN] = "[MAIN]";
+
+    m_nFileBuffOffset = 0;
+    while (m_nFileBuffOffset < nBuffSize)
+    {
+        pStrLine = &pBuff[m_nFileBuffOffset];
+
+        nRetCode = GetLineOfBuff(pBuff, nBuffSize);
+        if (!nRetCode)
+        {
+            break;
+        }
+
+        //nRetCode = KG_StrTrimBlank(szStrLine, 1);                       // 去掉行头的空白符，防止是空白符影响下面的判断
+        //KG_ASSERT(nRetCode);
+
+        if (IsKeyNameChar(pStrLine[0]))
+        { // key line
+            pKeyName  = pStrLine;
+            pKeyValue = SplitKeyValue(pStrLine);
+
+            //nRetCode = KG_StrTrimBlank(szKeyName, 2);                   // 去掉键名的尾部空白符
+            //KG_ASSERT(nRetCode);
+
+            SetKeyValue(pSecName, pKeyName, pKeyValue);
+        }
+
+        if ('[' == pStrLine[0])
+        { // section line
+            KG_Strncpy(pSecName, pStrLine, ::strlen(pStrLine));
+        }
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetLineOfBuff(char *pBuff, int nBuffSize)
+{ // nBuffSize = nFileSize
+    bool bResult    = false;
+    int  nCurOffset = 0;
+
+    KG_PROCESS_PTR_ERROR(pBuff);
+    KG_PROCESS_ERROR(nBuffSize > 0);
+    KG_PROCESS_ERROR(m_nFileBuffOffset < nBuffSize);
+
+    while (0x0D != pBuff[m_nFileBuffOffset] && 0x0A != pBuff[m_nFileBuffOffset])
+    { // '\r' = 0x0D '\n' = 0x0A
+        m_nFileBuffOffset++;
+        if (m_nFileBuffOffset >= nBuffSize)
+        {
+            break;
+        }
+    }
+    nCurOffset = m_nFileBuffOffset;
+
+    if (0x0D == pBuff[m_nFileBuffOffset] && 0x0A == pBuff[m_nFileBuffOffset + 1])
+    { // "\r\n"
+        m_nFileBuffOffset += 2;
+    }
+    else
+    { // "\n"
+        m_nFileBuffOffset += 1;
+    }
+
+    pBuff[nCurOffset] = '\0';
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::FormatSecName(char *pBuff, int nBuffSize, const char *pszSecName) const
+{
+    bool bResult = false;
+    int  nSrcLen = 0;
+    int  nDstLen = 0;
+
+    KG_PROCESS_PTR_ERROR(pBuff);
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+    KG_PROCESS_ERROR(nBuffSize >= KG_MAX_INI_SEC_LEN);
+
+    pBuff[0] = '\0';
+    nSrcLen  = (int)::strlen(pszSecName);
+
+    if ('[' != pszSecName[0])
+    {
+        pBuff[nDstLen++] = '[';
+        pBuff[nDstLen]   = '\0';
+    }
+
+    KG_PROCESS_ERROR(nDstLen + nSrcLen < nBuffSize);
+
+    ::strcat(pBuff, pszSecName);
+    nDstLen += nSrcLen;
+
+    if (']' != pBuff[nDstLen - 1])
+    {
+        KG_PROCESS_ERROR(nDstLen + 1 < nBuffSize);
+        pBuff[nDstLen++] = ']';
+        pBuff[nDstLen]   = '\0';
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::ReverseSecName(char *pBuff, int nBuffSize, const char *pszSecName) const
+{
+    bool        bResult = false;
+    int         nSrcLen = 0;
+    const char *pIter   = pszSecName;
+
+    KG_PROCESS_PTR_ERROR(pBuff);
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+    KG_PROCESS_ERROR(nBuffSize >= KG_MAX_INI_SEC_LEN);
+
+    pBuff[0] = '\0';
+    nSrcLen  = (int)::strlen(pszSecName);
+
+    if ('[' == pszSecName[0])
+    {
+        pIter++;
+        nSrcLen--;
+    }
+
+    KG_PROCESS_ERROR(nSrcLen < nBuffSize);
+    ::strcat(pBuff, pIter);
+
+    if (nSrcLen > 0 && ']' == pBuff[nSrcLen - 1])
+    {
+        pBuff[nSrcLen - 1] = '\0';
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetKeyValue(const char *pszSecName, const char *pszKeyName, char *pKeyValueBuff, int nBuffLen)
+{
+    bool               bResult        = false;
+    int                nRetCode       = 0;
+    int                nLen           = 0;
+    DWORD              dwId           = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode       = NULL;
+    PKG_IniFileKeyNode pKeyNode       = NULL;
+    char pSecName[KG_MAX_INI_SEC_LEN] = {'\0'};
+
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+    KG_PROCESS_C_STR_ERROR(pszKeyName);
+    KG_PROCESS_PTR_ERROR(pKeyValueBuff);
+    KG_PROCESS_ERROR(nBuffLen > 0);
+
+    // format section name
+    nRetCode = FormatSecName(pSecName, sizeof(pSecName), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+
+    dwId = KG_KSGStringHash(pSecName);                                  // section id => uId
+
+    // search for the matched section
+    pSecNode = m_RootSection.m_pNext;
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        pSecNode = m_pLatestSection;
+    }
+    else
+    {
+        while (NULL != pSecNode)
+        {
+            if (dwId == pSecNode->m_dwId)
+            {
+                m_pLatestSection = pSecNode;
+                break;
+            }
+
+            pSecNode = pSecNode->m_pNext;
+        }
+    }
+    KG_PROCESS_PTR_ERROR(pSecNode);                                     // if no such section founded
+
+    // search for the same key
+    dwId      = KG_KSGStringHash(pszKeyName);                           // key id => uId
+    pKeyNode = pSecNode->m_RootKey.m_pNext;
+
+    while (NULL != pKeyNode)
+    {
+        if (dwId == pKeyNode->m_dwId)
+        {
+            break;
+        }
+        pKeyNode = pKeyNode->m_pNext;
+    }
+
+    KG_PROCESS_PTR_ERROR(pKeyNode);                                     // if no such key found
+
+    // copy the value of the key
+    KG_PROCESS_PTR_ERROR(pKeyNode->m_pValue);
+
+    nLen = (int)::strlen(pKeyNode->m_pValue);
+    KG_PROCESS_ERROR(nLen < nBuffLen);                                  // Include '\0'
+    KG_Strncpy(pKeyValueBuff, pKeyNode->m_pValue, nLen);
+
+    bResult = true;
+Exit0:
+    return true;
+}
+
+bool KG_IniFile::SetKeyValue(const char *pszSecName, const char *pszKeyName, const char *pszKeyValue)
+{
+    bool               bResult        = false;
+    int                nRetCode       = 0;
+    int                nLen           = 0;
+    DWORD              dwId           = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pThisSecNode   = NULL;
+    PKG_IniFileSecNode pNextSecNode   = NULL;
+    PKG_IniFileKeyNode pThisKeyNode   = NULL;
+    PKG_IniFileKeyNode pNextKeyNode   = NULL;
+    char pSecName[KG_MAX_INI_SEC_LEN] = {'\0'};
+
+    KG_PROCESS_PTR_ERROR(pszKeyValue);                                  // key value can be empty string.
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+    KG_PROCESS_C_STR_ERROR(pszKeyName);
+
+    // format section name
+    nRetCode = FormatSecName(pSecName, sizeof(pSecName), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+
+    dwId = KG_KSGStringHash(pSecName);                                  // section id => uId
+
+    // search for the matched section
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        pThisSecNode = NULL;                                            //unuse
+        pNextSecNode = m_pLatestSection;
+    }
+    else
+    {
+        pThisSecNode = &m_RootSection;
+        pNextSecNode = pThisSecNode->m_pNext;
+
+        while (NULL != pNextSecNode)
+        {
+            if (dwId == pNextSecNode->m_dwId)
+            {
+                m_pLatestSection = pNextSecNode;
+                break;
+            }
+
+            pThisSecNode = pNextSecNode;                                // next => this
+            pNextSecNode = pThisSecNode->m_pNext;                       // next->next => next
+        }
+    }
+
+    // if no such section found, create a new section
+    if (NULL == pNextSecNode)
+    {
+        pNextSecNode = new KG_IniFileSecNode;
+        KG_PROCESS_PTR_ERROR(pNextSecNode);
+
+        pNextSecNode->m_dwId = dwId;
+
+        nLen = ::strlen(pSecName);
+        pNextSecNode->m_pName = ::new char[nLen + 1];                   // Include '\0'
+        KG_Strncpy(pNextSecNode->m_pName, pSecName, nLen);
+
+        pNextSecNode->m_RootKey.m_pNext = NULL;                         // m_RootKey
+        pNextSecNode->m_pNext           = NULL;                         // m_pNext
+        pThisSecNode->m_pNext           = pNextSecNode;                 // into link
+        m_pLatestSection                = pNextSecNode;                 // change m_pLatestSection
+    }
+
+    // search for the same key
+    pThisKeyNode = &pNextSecNode->m_RootKey;
+    pNextKeyNode = pThisKeyNode->m_pNext;
+    dwId = KG_KSGStringHash(pszKeyName);                                // key id => uId
+
+    while (NULL != pNextKeyNode)
+    {
+        if (dwId == pNextKeyNode->m_dwId)
+        {
+            break;
+        }
+
+        pThisKeyNode = pNextKeyNode;
+        pNextKeyNode = pThisKeyNode->m_pNext;
+    }
+
+    // if no such key found create a new key
+    if (NULL == pNextKeyNode)
+    {
+        pNextKeyNode = new KG_IniFileKeyNode;
+        KG_PROCESS_PTR_ERROR(pNextKeyNode);
+
+        pNextKeyNode->m_dwId = dwId;                                    // m_uId
+
+        nLen = ::strlen(pszKeyName);
+        pNextKeyNode->m_pName = ::new char[nLen + 1];                   // Include '\0'
+        KG_Strncpy(pNextKeyNode->m_pName, pszKeyName, nLen);
+        pNextKeyNode->m_pValue = NULL;
+        pNextKeyNode->m_pNext  = NULL;
+        pThisKeyNode->m_pNext  = pNextKeyNode;                          // into link
+    }
+
+    // replace the old value with new
+    KG_DeleteArrayPtrSafely(pNextKeyNode->m_pValue);
+    nLen = ::strlen(pszKeyValue);
+    pNextKeyNode->m_pValue = ::new char[nLen + 1];                     // Include '\0'
+    KG_Strncpy(pNextKeyNode->m_pValue, pszKeyValue, nLen);
+
+    bResult = true;
+Exit0:
+    return bResult;
 }
 
 KG_NAMESPACE_END

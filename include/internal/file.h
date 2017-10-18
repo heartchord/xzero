@@ -2,6 +2,12 @@
 
 #include "public.h"
 
+#undef  KG_MAX_INI_SEC_LEN
+#define KG_MAX_INI_SEC_LEN  64                                          // Include '\0' character
+
+#undef  KG_MAX_INI_KEY_LEN
+#define KG_MAX_INI_KEY_LEN  64                                          // Include '\0' character
+
 KG_NAMESPACE_BEGIN(xzero)
 
 int KG_OpenFileSafely (FILE *&fp, const char * const cszFile, const char * const cszMode);
@@ -79,11 +85,60 @@ public:
 
 public:
     bool Load(KG_File *pFile);
-    bool Load(const char * pszFilePath);
+    bool Save(KG_File *pFile);
+
+    bool Load(const char *pszFilePath);
+    bool Save(const char *pszFilePath);
+
+    void Release();
+
+    bool IsSecExisted(const char *pszSecName) const;
+    bool IsKeyExisted(const char *pszSecName, const char *pszKeyName) const;
+
+    bool GetNextSec(const char *pszSecName, char *pNextSecBuff, int nBuffLen) const;
+    bool GetNextKey(const char *pszSecName, const char *pszKeyName, char *pNextKeyBuff, int nBuffLen) const;
+
+    int  GetSecCount() const;
+    int  GetKeyCount(const char *pszSecName) const;
+
+    bool EraseSec(const char *pszSecName);
+    bool EraseKey(const char *pszSecName, const char *pszKeyName);
+
+    bool GetStr   (const char *pszSecName, const char *pszKeyName, const char *pszDefault, char * pKeyValueBuff, int nBuffLen) const;
+    bool GetInt   (const char *pszSecName, const char *pszKeyName, int         nDefault,   int *  pnKeyValue ) const;
+    bool GetBool  (const char *pszSecName, const char *pszKeyName, bool        bDefault,   bool * pbKeyValue ) const;
+    bool GetLong  (const char *pszSecName, const char *pszKeyName, long        lDefault,   long * plKeyValue ) const;
+    bool GetFloat (const char *pszSecName, const char *pszKeyName, float       fDefault,   float *pfKeyValue ) const;
+    bool GetStruct(const char *pszSecName, const char *pszKeyName, void *      pvStruct,   int    nStructSize) const;
+
+    bool SetStr   (const char *pszSecName, const char *pszKeyName, const char *pszKeyValue);
+    bool SetInt   (const char *pszSecName, const char *pszKeyName, int         nKeyValue  );
+    bool SetBool  (const char *pszSecName, const char *pszKeyName, bool        bKeyValue  );
+    bool SetLong  (const char *pszSecName, const char *pszKeyName, long        lKeyValue  );
+    bool SetFloat (const char *pszSecName, const char *pszKeyName, float       fKeyValue  );
+    bool SetStruct(const char *pszSecName, const char *pszKeyName, void *      pvStruct, int nStructSize);
+
+    bool GetMultiInt  (const char *pszSecName, const char *pszKeyName, int   pnKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
+    bool GetMultiLong (const char *pszSecName, const char *pszKeyName, long  plKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
+    bool GetMultiFloat(const char *pszSecName, const char *pszKeyName, float pfKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
+
+    bool SetMultiInt  (const char *pszSecName, const char *pszKeyName, int   pnKeyValueArray[], int nKeyValueCount);
+    bool SetMultiLong (const char *pszSecName, const char *pszKeyName, long  plKeyValueArray[], int nKeyValueCount);
+    bool SetMultiFloat(const char *pszSecName, const char *pszKeyName, float pfKeyValueArray[], int nKeyValueCount);
 
 private:
+    bool  IsKeyNameChar (char c) const;
+    char *SplitKeyValue (char *szLine) const;
+    bool  CreateIniLink (char *pBuff, int nBuffSize);
+    bool  GetLineOfBuff (char *pBuff, int nBuffSize);
+    bool  FormatSecName (char *pBuff, int nBuffSize, const char *pszSecName) const;
+    bool  ReverseSecName(char *pBuff, int nBuffSize, const char *pszSecName) const;
+
+    bool GetKeyValue(const char *pszSecName, const char *pszKeyName, char *pKeyValueBuff, int nBuffLen);
+    bool SetKeyValue(const char *pszSecName, const char *pszKeyName, const char *pszKeyValue);
+private:
     KG_IniFileSecNode  m_RootSection;                                   // section list
-    long               m_lFileBuffOffset;                               // file buffer offset
+    int                m_nFileBuffOffset;                               // file buffer offset
     PKG_IniFileSecNode m_pLatestSection;                                // the latest accessed section
 };
 

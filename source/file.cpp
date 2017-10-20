@@ -401,6 +401,8 @@ bool KG_IniFile::CreateIniLink(char *pBuff, int nBuffSize)
     char *pKeyValue                    = NULL;
     char  pSecName[KG_MAX_INI_SEC_LEN] = "[MAIN]";
 
+    KG_PROCESS_PTR_ERROR(pBuff);
+
     m_nFileBuffOffset = 0;
     while (m_nFileBuffOffset < nBuffSize)
     {

@@ -2,9 +2,9 @@
 
 #include "public.h"
 
-#include "../../../x3rdlibrary/include/lua-5.3.4/lua.h"
-#include "../../../x3rdlibrary/include/lua-5.3.4/lualib.h"
-#include "../../../x3rdlibrary/include/lua-5.3.4/lauxlib.h"
+#include "../../../x3rdlibrary/include/lua-5.1.5/lua.h"
+#include "../../../x3rdlibrary/include/lua-5.1.5/lualib.h"
+#include "../../../x3rdlibrary/include/lua-5.1.5/lauxlib.h"
 
 #include <map>
 #include <vector>

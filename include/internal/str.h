@@ -4,6 +4,11 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-bool KG_Strncpy(char *pDstStr, const char *pszSrcStr, int nCount);
+bool KG_Strncpy       (char *pBuff, const char *pszStr, size_t uCount);
+int  KG_Snprintf      (char *pBuff, size_t uBuffSize, const char *pszFormat, ...);
+int  KG_Strcasecmp    (const char *pszStr1, const char *pszStr2);
+int  KG_Strncasecmp   (const char *pszStr1, const char *pszStr2, size_t uCount);
+int  KG_BinData2HexStr(const char *pData, size_t uCount, char *pBuff, size_t uBuffSize);
+int  KG_HexStr2BinData(const char *pszHexStr, size_t uCount, char *pBuff, size_t uBuffSize);
 
 KG_NAMESPACE_END

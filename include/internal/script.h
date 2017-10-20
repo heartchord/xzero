@@ -54,11 +54,11 @@ struct KG_LuaScriptInfo
 
 typedef std::map<DWORD, KG_LuaScriptInfo> KG_LuaScriptInfoMap;
 
-class KG_LuaScript
+class KG_LuaScriptV51
 {
 public:
-    KG_LuaScript();
-    virtual ~KG_LuaScript();
+    KG_LuaScriptV51();
+    virtual ~KG_LuaScriptV51();
 
 public:
     bool LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize);

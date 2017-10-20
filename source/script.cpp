@@ -1,6 +1,9 @@
-#include "script.h"
-#include "debug.h"
 #include "str.h"
+#include "hash.h"
+#include "file.h"
+#include "debug.h"
+#include "script.h"
+#include "pointer.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 
@@ -12,6 +15,52 @@ KG_LuaScriptV51::KG_LuaScriptV51()
 
 KG_LuaScriptV51::~KG_LuaScriptV51()
 {
+}
+
+bool KG_LuaScriptV51::LoadFromFile(const char *pszFileName, DWORD *pdwScriptId)
+{
+    bool    bResult    = false;
+    int     nRetCode   = 0;
+    DWORD   dwFileSize = 0;
+    DWORD   dwReadSize = 0;
+    char *  pBuf       = NULL;
+    KG_File fs;
+
+    KG_PROCESS_C_STR_ERROR(pszFileName);
+    KG_PROCESS_PTR_ERROR(pdwScriptId);
+
+    *pdwScriptId = KG_KSGFileNameHash(pszFileName);
+
+    //bRetCode = IsScriptExist(*pdwScriptId);
+    //KG_PROCESS_SUCCESS(bRetCode);
+
+    nRetCode = fs.Open(pszFileName, "r");
+    KG_PROCESS_ERROR(nRetCode);
+
+    dwFileSize = fs.Size();
+    KG_PROCESS_ERROR(dwFileSize > 0);
+
+    pBuf = new char[dwFileSize];
+    KG_PROCESS_PTR_ERROR(pBuf);
+
+    dwReadSize = fs.Read(pBuf, dwFileSize, dwFileSize);
+    KG_PROCESS_ERROR(dwReadSize == dwFileSize);
+
+    nRetCode = LoadFromBuff(*pdwScriptId, pszFileName, pBuf, dwFileSize);
+    KG_PROCESS_ERROR(nRetCode);
+
+Exit1:
+    bResult = true;
+Exit0:
+    if (!bResult)
+    {
+        //KGLogPrintf(KGLOG_ERR, "[Lua] Failed to load script: %s", cszFileName);
+    }
+
+    KG_DeleteArrayPtrSafely(pBuf);
+    fs.Close();
+
+    return bResult;
 }
 
 bool KG_LuaScriptV51::LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize)

@@ -61,6 +61,7 @@ public:
     virtual ~KG_LuaScriptV51();
 
 public:
+    bool LoadFromFile(const char *pszFileName, DWORD *pdwScriptId);
     bool LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize);
 
     // add global variable.

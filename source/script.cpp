@@ -17,6 +17,49 @@ KG_LuaScriptV51::~KG_LuaScriptV51()
 {
 }
 
+bool KG_LuaScriptV51::Create()
+{
+    bool bResult      = false;
+    int  nStackTopIdx = 0;
+
+    m_nMetaTableRIdx = LUA_NOREF;
+
+    KG_PROCESS_ERROR(NULL == m_pLuaState);
+
+    m_pLuaState = luaL_newstate();
+    KG_PROCESS_PTR_ERROR(m_pLuaState);
+
+    luaL_openlibs(m_pLuaState);
+    lua_register(m_pLuaState, "Include", _Include);
+
+    lua_pushstring(m_pLuaState, KG_LUA_SCRIPT_THIS);
+    lua_pushlightuserdata(m_pLuaState, this);
+    lua_settable(m_pLuaState, LUA_GLOBALSINDEX);
+
+    lua_newtable(m_pLuaState);
+    nStackTopIdx = lua_gettop(m_pLuaState);
+
+    lua_pushstring(m_pLuaState, "__index");
+    lua_pushcfunction(m_pLuaState, KLuaScriptEx::_IndexForEnv);
+    lua_settable(m_pLuaState, nStackTopIdx);
+
+    m_nMetaTableRIdx = luaL_ref(m_pLuaState, LUA_REGISTRYINDEX);
+
+    bResult = true;
+Exit0:
+    if (!bResult)
+    {
+        if (LUA_NOREF != m_nMetaTableRIdx)
+        {
+            luaL_unref(m_pLuaState, LUA_REGISTRYINDEX, m_nMetaTableRIdx);
+            m_nMetaTableRIdx = LUA_NOREF;
+        }
+
+        KG_CloseLuaStateSafely(m_pLuaState);
+    }
+    return bResult;
+}
+
 bool KG_LuaScriptV51::LoadFromFile(const char *pszFileName, DWORD *pdwScriptId)
 {
     bool    bResult    = false;
@@ -68,7 +111,7 @@ bool KG_LuaScriptV51::LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, 
     bool              bResult            = false;
     int               nRetCode           = 0;
     DWORD             dwPreviousScriptId = m_dwActiveScriptId;                              // save current active script.
-    KG_LuaScriptInfo *pScriptInfo        = NULL;
+    KG_LuaScriptData *pScriptData        = NULL;
 
     KG_PROCESS_C_STR_ERROR(pszScriptName);
     KG_PROCESS_PTR_ERROR(pBuff);
@@ -84,9 +127,9 @@ bool KG_LuaScriptV51::LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, 
     }
 
     // load some script in server life-time.
-    pScriptInfo = &m_scriptInfoMap[dwScriptId];
-    nRetCode = KG_Snprintf(pScriptInfo->m_szName, sizeof(pScriptInfo->m_szName), "%s", pszScriptName);
-    KG_PROCESS_ERROR(nRetCode > 0 && nRetCode < (int)sizeof(pScriptInfo->m_szName));        // include '\0'.
+    pScriptData = &m_scriptDataMap[dwScriptId];
+    nRetCode = KG_Snprintf(pScriptData->m_szName, sizeof(pScriptData->m_szName), "%s", pszScriptName);
+    KG_PROCESS_ERROR(nRetCode > 0 && nRetCode < (int)sizeof(pScriptData->m_szName));        // include '\0'.
 
     // associate this script to lua.
     nRetCode = _AssociateScriptToLua(dwScriptId);
@@ -281,6 +324,62 @@ Exit0:
     return bResult;
 }
 
+bool KG_LuaScriptV51::IsScriptLoaded(DWORD dwScriptId) const
+{
+    bool                                bResult = false;
+    KG_LuaScriptDataMap::const_iterator it      = m_scriptDataMap.find(dwScriptId);
+
+    if (it != m_scriptDataMap.end())
+    {
+        bResult = true;
+    }
+
+    return bResult;
+}
+
+bool KG_LuaScriptV51::IsScriptIncluded(DWORD dwScriptId, DWORD dwIncludedScriptId)
+{
+    bool              bResult     = false;
+    size_t            uIdx        = 0;
+    size_t            uSize       = 0;
+    KG_LuaScriptData* pScriptData = NULL;
+
+    pScriptData = GetScriptData(dwScriptId);
+    KG_PROCESS_PTR_ERROR(pScriptData);
+
+    uSize = pScriptData->m_IncludeScripts.size();
+    for (uIdx = 0; uIdx < uSize; uIdx++)
+    {
+        if (pScriptData->m_IncludeScripts[uIdx].m_dwScriptId == dwIncludedScriptId)
+        {
+            break;
+        }
+    }
+    KG_PROCESS_ERROR(uIdx == uSize);
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+DWORD KG_LuaScriptV51::GetActiveScriptId() const
+{
+    return m_dwActiveScriptId;
+}
+
+KG_LuaScriptData *KG_LuaScriptV51::GetScriptData(DWORD dwScriptId)
+{
+    KG_LuaScriptData *            pResult = NULL;
+    KG_LuaScriptDataMap::iterator it      = m_scriptDataMap.find(dwScriptId);
+
+    if (it != m_scriptDataMap.end())
+    {
+        pResult = &it->second;
+    }
+
+    return pResult;
+}
+
 // create a new table associated to the specified metatable and save it to gt[dwScriptID]
 bool KG_LuaScriptV51::_AssociateScriptToLua(DWORD dwScriptId)
 {
@@ -318,6 +417,65 @@ bool KG_LuaScriptV51::_AssociateScriptToLua(DWORD dwScriptId)
     bResult = true;
 Exit0:
     return bResult;
+}
+
+int KG_LuaScriptV51::_Include(lua_State* L)
+{
+    int               nResult          = 0;
+    int               nRetCode         = 0;
+    DWORD             dwScriptId       = 0;
+    DWORD             dwActiveScriptId = 0;
+    const char *      pszFileName      = NULL;
+    KG_LuaScriptV51 * pThis            = NULL;
+    KG_LuaScriptData *pScriptData      = NULL;
+    KG_LuaIncludeData data;
+
+    KG_PROCESS_PTR_ERROR(L);
+
+    nRetCode = lua_gettop(L);
+    KG_PROCESS_ERROR(1 == nRetCode);                                    // "Include" got only one parameter.
+
+    pszFileName = lua_tostring(L, 1);
+    KG_PROCESS_C_STR_ERROR(pszFileName);
+
+    dwScriptId = KG_KSGFileNameHash(pszFileName);
+    KG_PROCESS_ERROR(dwScriptId > 0);
+
+    // get KG_LuaScriptV51 instance from lua.
+    lua_pushstring(L, KG_LUA_SCRIPT_THIS);
+    lua_gettable(L, LUA_GLOBALSINDEX);                                  // Pushes onto the stack the value t[k], where t is the value at the given valid index and k is the value at the top of the stack.
+    /* -------------------------- */
+    /* | gt["KG_LuaScriptThis"] | */
+    /* -------------------------  */
+    /* |      pszFileName       | */
+    /* -------------------------- */
+
+    pThis = (KG_LuaScriptV51 *)lua_touserdata(L, 2);
+    KG_PROCESS_PTR_ERROR(pThis);
+
+    dwActiveScriptId = pThis->GetActiveScriptId();
+    KG_PROCESS_ERROR(dwActiveScriptId > 0);
+
+    pScriptData = pThis->GetScriptData(dwActiveScriptId);
+    KG_PROCESS_PTR_ERROR(pScriptData);
+
+    nRetCode = pThis->IsScriptLoaded(dwScriptId);
+    if (!nRetCode)
+    { // If included file not loaded
+        nRetCode = pThis->LoadFromFile(pszFileName, &dwScriptId);
+        KG_PROCESS_ERROR(nRetCode);
+    }
+
+    nRetCode = pThis->IsScriptIncluded(dwActiveScriptId, dwScriptId);
+    KG_PROCESS_ERROR(nRetCode);
+
+    // add to included list
+    data.m_dwScriptId  = dwScriptId;
+    data.m_pScriptData = pThis->GetScriptData(dwScriptId);
+    pScriptData->m_IncludeScripts.push_back(data);
+
+Exit0:
+    return nResult;
 }
 
 KG_NAMESPACE_END

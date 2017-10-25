@@ -1,6 +1,7 @@
 #pragma once
 
 #include "public.h"
+#include "debug.h"
 
 #include "../../../x3rdlibrary/include/lua-5.1.5/lua.h"
 #include "../../../x3rdlibrary/include/lua-5.1.5/lualib.h"
@@ -20,31 +21,22 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-template <class T>
-inline void KG_CloseLuaStateSafely(T *&p)
+inline void KG_CloseLuaStateSafely(lua_State *&pLuaState)
 {
-    // check if type is complete 
-    typedef char TypeMustBeComplete[ sizeof(T) ? 1 : -1 ];
-    (void)sizeof(TypeMustBeComplete);
-
-    if (NULL != p)
+    if (NULL != pLuaState)
     {
-        lua_close(p);
-        p = NULL;
+        lua_close(pLuaState);
+        pLuaState = NULL;
     }
 }
 
-template <class T>
-inline void KG_UnRefLuaStateSafely(T *&p)
+inline void KG_LuaUnRefSafely(lua_State *pLuaState, int &nRIdx)
 {
-    // check if type is complete 
-    typedef char TypeMustBeComplete[ sizeof(T) ? 1 : -1 ];
-    (void)sizeof(TypeMustBeComplete);
-
-    if (NULL != p)
+    if (LUA_NOREF != nRIdx)
     {
-        lua_close(p);
-        p = NULL;
+        KG_ASSERT(pLuaState);
+        luaL_unref(pLuaState, LUA_REGISTRYINDEX, nRIdx);
+        nRIdx = LUA_NOREF;
     }
 }
 
@@ -92,38 +84,42 @@ public:
     virtual ~KG_LuaScriptV51();
 
 public:
-    bool Create();
-    void Destroy();
+    bool Init();                                                                                            // init env
+    void UnInit();                                                                                          // uninit env
+    void Release();                                                                                         // uninit env and destroy instance
 
-    bool LoadFromFile(const char *pszFileName, DWORD *pdwScriptId);
-    bool LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize);
+    bool LoadFromFile(const char *pszFileName, DWORD *pdwScriptId);                                         // load chunk from file
+    bool LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, const char *pBuff, DWORD dwFileSize);    // load chunk from buffer
 
     // add global variable.
-    bool AddGlobalInteger(const char *pszVarName, int         nValue  );
-    bool AddGlobalString (const char *pszVarName, const char *pszValue);
+    bool AddGlobalInteger(const char *pszVarName, int         nValue  );                                    // add global variable
+    bool AddGlobalString (const char *pszVarName, const char *pszValue);                                    // add global variable
 
     // add local variable.
-    bool AddLocalInteger(DWORD dwScriptId, const char *pszVarName, int         nValue  );
-    bool AddLocalString (DWORD dwScriptId, const char *pszVarName, const char *pszValue);
+    bool AddLocalInteger(DWORD dwScriptId, const char *pszVarName, int         nValue  );                   // add local variable
+    bool AddLocalString (DWORD dwScriptId, const char *pszVarName, const char *pszValue);                   // add local variable
 
-    bool IsScriptLoaded(DWORD dwScriptId) const;
-    bool IsScriptIncluded(DWORD dwScriptId, DWORD dwIncludedScriptId);
+    bool IsScriptLoaded(DWORD dwScriptId) const;                                                            // is script loaded?
+    bool IsScriptIncluded(DWORD dwScriptId, DWORD dwIncludedScriptId);                                      // has script A included script B?
 
-    DWORD             GetActiveScriptId() const;
-    KG_LuaScriptData *GetScriptData(DWORD dwScriptId);
+    DWORD             GetActiveScriptId() const;                                                            // get script id of current invoked script.
+    KG_LuaScriptData *GetScriptData(DWORD dwScriptId);                                                      // get associated data of script.
+    lua_State *       GetLuaState();                                                                        // get lua_State instance.
 
 
 private:
     bool _AssociateScriptToLua(DWORD dwScriptID);
+    bool _GetVarInIncludeScripts(const KG_LuaIncludeData &includes, const char *pszValueName);              // try to access variable's value from all including files
 
 private:
-    static int _Include(lua_State* L);
+    static int _LuaInclude(lua_State* L);                                                                   // custom "Include" keyword.
+    static int _LuaIndex(lua_State* L);                                                                     // the "__index" function of mt.
 
 private:
-    lua_State *         m_pLuaState;                                    // lua virtual machine instance.
-    DWORD               m_dwActiveScriptId;                             // active lua script id.
-    KG_LuaScriptDataMap m_scriptDataMap;                                // all lua script associated data map.
-    int                 m_nMetaTableRIdx;                               // the metatable reference.
+    lua_State *         m_pLuaState;                                                                        // lua virtual machine instance.
+    DWORD               m_dwActiveScriptId;                                                                 // active lua script id.
+    KG_LuaScriptDataMap m_scriptDataMap;                                                                    // all lua script associated data map.
+    int                 m_nMetaTableRIdx;                                                                   // the metatable reference.
 };
 
 KG_NAMESPACE_END

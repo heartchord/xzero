@@ -3,6 +3,8 @@
 
 #include <string.h>
 
+#pragma warning(disable:4996)
+
 KG_NAMESPACE_BEGIN(xzero)
 
 bool KG_Strncpy(char *pBuff, const char *pszStr, size_t uCount)
@@ -36,7 +38,7 @@ int KG_Snprintf(char *pBuff, size_t uBuffSize, const char *pszFormat, ...)
     nResult = ::vsnprintf (pBuff, uBuffSize, pszFormat, args);
 #endif // KG_PLATFORM_WINDOWS
 
-    if(nResult >= uBuffSize || nResult < 0)
+    if(nResult >= (int)uBuffSize || nResult < 0)
     { // windows : formated_str_len == uBuffSize, ret = uBuffSize; formated_str_len > uBuffSize, ret < 0.
       // linux   : vsnprintf returns formated_str_len.
         KG_ASSERT(false && "[Warning] string will be truncated!");

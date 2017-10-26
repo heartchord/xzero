@@ -3,9 +3,19 @@
 #include "public.h"
 #include "debug.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "../../../x3rdlibrary/include/lua-5.1.5/lua.h"
 #include "../../../x3rdlibrary/include/lua-5.1.5/lualib.h"
+#include "../../../x3rdlibrary/include/lua-5.1.5/lstate.h"
 #include "../../../x3rdlibrary/include/lua-5.1.5/lauxlib.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #include <map>
 #include <vector>

@@ -5,8 +5,6 @@
 #include "script.h"
 #include "pointer.h"
 
-#include "../../../x3rdlibrary/include/lua-5.1.5/lstate.h"
-
 KG_NAMESPACE_BEGIN(xzero)
 
 KG_LuaScriptV51::KG_LuaScriptV51()
@@ -123,7 +121,7 @@ bool KG_LuaScriptV51::LoadFromFile(const char *pszFileName, DWORD *pdwScriptId)
     nRetCode = IsScriptLoaded(*pdwScriptId);
     KG_PROCESS_SUCCESS(nRetCode);                                       // file has been loaded.
 
-    nRetCode = fs.Open(pszFileName, "r");
+    nRetCode = fs.Open(pszFileName, "rb");
     KG_PROCESS_ERROR(nRetCode);
 
     dwFileSize = fs.Size();
@@ -478,7 +476,7 @@ bool KG_LuaScriptV51::_GetVarInIncludeScripts(const KG_LuaIncludeData &includes,
     int               nRetCode    = 0;
     DWORD             dwScriptId  = 0;
     KG_LuaScriptData *pScriptData = NULL;
-    size_t            uIdx        = 0;
+    int               nIdx        = 0;
     size_t            uSize       = 0;
 
     dwScriptId  = includes.m_dwScriptId;
@@ -489,9 +487,9 @@ bool KG_LuaScriptV51::_GetVarInIncludeScripts(const KG_LuaIncludeData &includes,
     KG_PROCESS_C_STR_ERROR(pszValueName);
 
     uSize = pScriptData->m_IncludeScripts.size();
-    for (uIdx = uSize - 1; uIdx >= 0; uIdx--)
+    for (nIdx = uSize - 1; nIdx >= 0; nIdx--)
     { //  Traverse all including scripts in a reverse order, to let the including file seems to be overridden.
-        dwScriptId = pScriptData->m_IncludeScripts[uIdx].m_dwScriptId;
+        dwScriptId = pScriptData->m_IncludeScripts[nIdx].m_dwScriptId;
         if (dwScriptId == 0)
         {
             continue;
@@ -529,7 +527,7 @@ bool KG_LuaScriptV51::_GetVarInIncludeScripts(const KG_LuaIncludeData &includes,
             lua_remove(m_pLuaState, -1);                                // remove v
 
             // traverse all sub including files recursively.
-            nRetCode = _GetVarInIncludeScripts(pScriptData->m_IncludeScripts[uIdx], pszValueName);
+            nRetCode = _GetVarInIncludeScripts(pScriptData->m_IncludeScripts[nIdx], pszValueName);
             if (!nRetCode)
             { // not found
                 continue;
@@ -540,7 +538,7 @@ bool KG_LuaScriptV51::_GetVarInIncludeScripts(const KG_LuaIncludeData &includes,
         break;
     }
 
-    KG_PROCESS_ERROR(uIdx >= 0);
+    KG_PROCESS_ERROR_Q(nIdx >= 0);
 
     bResult = true;
 Exit0:

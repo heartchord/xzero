@@ -1,6 +1,6 @@
 #pragma once
 
-#include "public.h"
+#include "xpublic.h"
 
 #undef  KG_MAX_INI_SEC_LEN
 #define KG_MAX_INI_SEC_LEN  64                                          // Include '\0' character

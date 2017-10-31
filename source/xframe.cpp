@@ -1,5 +1,5 @@
-#include "frame.h"
-#include "time.h"
+#include "xframe.h"
+#include "xtime.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 

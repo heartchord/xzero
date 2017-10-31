@@ -1,7 +1,7 @@
 #pragma once
 
-#include "public.h"
-#include "debug.h"
+#include "xpublic.h"
+#include "xdebug.h"
 
 #ifdef __cplusplus
 extern "C"

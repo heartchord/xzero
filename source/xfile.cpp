@@ -1,8 +1,8 @@
-#include "str.h"
-#include "hash.h"
-#include "file.h"
-#include "debug.h"
-#include "pointer.h"
+#include "xhash.h"
+#include "xfile.h"
+#include "xdebug.h"
+#include "xstring.h"
+#include "xpointer.h"
 
 # pragma warning(disable: 4996)
 

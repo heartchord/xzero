@@ -1,5 +1,5 @@
-#include "path.h"
-#include "debug.h"
+#include "xpath.h"
+#include "xdebug.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 

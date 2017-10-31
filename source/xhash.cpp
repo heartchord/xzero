@@ -1,4 +1,4 @@
-#include "hash.h"
+#include "xhash.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 

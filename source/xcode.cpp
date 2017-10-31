@@ -1,5 +1,5 @@
-#include "code.h"
-#include "debug.h"
+#include "xcode.h"
+#include "xdebug.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 

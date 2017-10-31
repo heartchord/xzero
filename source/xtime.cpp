@@ -1,4 +1,4 @@
-#include "time.h"
+#include "xtime.h"
 
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
 #include <mmsystem.h>
@@ -56,6 +56,17 @@ DWORD KG_GetTickCount()
     return uElapsedTime;
 }
 
+struct tm *KG_LocalTime(const time_t *pTimep, struct tm *pResult)
+{
+    struct tm *pTm = ::localtime(pTimep);
+    if (NULL != pResult && NULL != pTm)
+    {
+        *pResult = *pTm;
+    }
+
+    return pTm;
+}
+
 #else                                                                   // linux platform
 
 DWORD KG_GetTickCount()
@@ -87,6 +98,11 @@ DWORD KG_GetTickCount()
     }
 
     return uElapsedTime;
+}
+
+struct tm *KG_LocalTime(const time_t *pTimep, struct tm *pResult)
+{
+    return localtime_r(pTimep, pResult);
 }
 
 #endif // KG_PLATFORM_WINDOWS

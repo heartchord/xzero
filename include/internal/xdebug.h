@@ -1,6 +1,6 @@
 #pragma once
 
-#include "public.h"
+#include "xpublic.h"
 
 #ifdef _DEBUG                                                           // debug mode
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform

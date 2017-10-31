@@ -1,6 +1,6 @@
 #pragma once
 
-#include "public.h"
+#include "xpublic.h"
 
 KG_NAMESPACE_BEGIN(xzero)
 

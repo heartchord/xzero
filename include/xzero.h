@@ -1,10 +1,10 @@
 #pragma once
 
-#include "internal/code.h"
-#include "internal/file.h"
-#include "internal/path.h"
-#include "internal/atomic.h"
-#include "internal/script.h"
-#include "internal/mempool.h"
-#include "internal/pattern.h"
-#include "internal/delegate.h"
+#include "internal/xcode.h"
+#include "internal/xfile.h"
+#include "internal/xpath.h"
+#include "internal/xatom.h"
+#include "internal/xscript.h"
+#include "internal/xmempool.h"
+#include "internal/xpattern.h"
+#include "internal/xdelegate.h"

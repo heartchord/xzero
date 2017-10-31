@@ -19,38 +19,38 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\internal\atomic.h" />
-    <ClInclude Include="include\internal\code.h" />
-    <ClInclude Include="include\internal\debug.h" />
-    <ClInclude Include="include\internal\delegate.h" />
-    <ClInclude Include="include\internal\file.h" />
-    <ClInclude Include="include\internal\frame.h" />
-    <ClInclude Include="include\internal\hash.h" />
-    <ClInclude Include="include\internal\list.h" />
-    <ClInclude Include="include\internal\mempool.h" />
-    <ClInclude Include="include\internal\path.h" />
-    <ClInclude Include="include\internal\pattern.h" />
-    <ClInclude Include="include\internal\pointer.h" />
-    <ClInclude Include="include\internal\public.h" />
-    <ClInclude Include="include\internal\script.h" />
-    <ClInclude Include="include\internal\str.h" />
-    <ClInclude Include="include\internal\time.h" />
+    <ClInclude Include="include\internal\xatom.h" />
+    <ClInclude Include="include\internal\xcode.h" />
+    <ClInclude Include="include\internal\xdebug.h" />
+    <ClInclude Include="include\internal\xdelegate.h" />
+    <ClInclude Include="include\internal\xfile.h" />
+    <ClInclude Include="include\internal\xframe.h" />
+    <ClInclude Include="include\internal\xhash.h" />
+    <ClInclude Include="include\internal\xlist.h" />
+    <ClInclude Include="include\internal\xmempool.h" />
+    <ClInclude Include="include\internal\xpath.h" />
+    <ClInclude Include="include\internal\xpattern.h" />
+    <ClInclude Include="include\internal\xpointer.h" />
+    <ClInclude Include="include\internal\xpublic.h" />
+    <ClInclude Include="include\internal\xscript.h" />
+    <ClInclude Include="include\internal\xstring.h" />
+    <ClInclude Include="include\internal\xtime.h" />
     <ClInclude Include="include\xzero.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\code.cpp" />
-    <ClCompile Include="source\debug.cpp" />
-    <ClCompile Include="source\file.cpp" />
-    <ClCompile Include="source\frame.cpp" />
-    <ClCompile Include="source\hash.cpp" />
-    <ClCompile Include="source\list.cpp" />
-    <ClCompile Include="source\mempool.cpp" />
-    <ClCompile Include="source\path.cpp" />
-    <ClCompile Include="source\pattern.cpp" />
-    <ClCompile Include="source\pointer.cpp" />
-    <ClCompile Include="source\script.cpp" />
-    <ClCompile Include="source\str.cpp" />
-    <ClCompile Include="source\time.cpp" />
+    <ClCompile Include="source\xcode.cpp" />
+    <ClCompile Include="source\xdebug.cpp" />
+    <ClCompile Include="source\xfile.cpp" />
+    <ClCompile Include="source\xframe.cpp" />
+    <ClCompile Include="source\xhash.cpp" />
+    <ClCompile Include="source\xlist.cpp" />
+    <ClCompile Include="source\xmempool.cpp" />
+    <ClCompile Include="source\xpath.cpp" />
+    <ClCompile Include="source\xpattern.cpp" />
+    <ClCompile Include="source\xpointer.cpp" />
+    <ClCompile Include="source\xscript.cpp" />
+    <ClCompile Include="source\xstring.cpp" />
+    <ClCompile Include="source\xtime.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

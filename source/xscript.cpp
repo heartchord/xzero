@@ -5,6 +5,8 @@
 #include "script.h"
 #include "pointer.h"
 
+#include <time.h>
+
 KG_NAMESPACE_BEGIN(xzero)
 
 KG_LuaScriptV51::KG_LuaScriptV51()
@@ -429,6 +431,65 @@ KG_LuaScriptData *KG_LuaScriptV51::GetScriptData(DWORD dwScriptId)
 lua_State *KG_LuaScriptV51::GetLuaState()
 {
     return m_pLuaState;
+}
+
+void KG_LuaScriptV51::DumpStrt() const
+{
+    stringtable *pST     = NULL; 
+    lu_int32         uNuse    = 0;
+    lu_int32         uSize    = 0;
+    time_t      nTime   = ::time(NULL);
+    char        szFileName[_MAX_PATH];
+    struct      tm tmNow;
+    KG_File fs;
+
+    KG_PROCESS_ERROR(m_pLuaState);
+
+    pST = &G(m_pLuaState)->strt;
+    uNuse = pST->nuse;
+    uSize = pST->size;
+
+    localtime_r(&nTime, &tmNow);
+
+    KG_mkdir("lua_stat");
+
+    snprintf(
+        szFileName, sizeof(szFileName), 
+        "lua_stat/strt_dump-%d%2.2d%2.2d-%2.2d%2.2d%2.2d.txt",
+        tmNow.tm_year + 1900,
+        tmNow.tm_mon + 1,
+        tmNow.tm_mday,
+        tmNow.tm_hour,
+        tmNow.tm_min,
+        tmNow.tm_sec
+    );
+    szFileName[sizeof(szFileName) - 1] = '\0';
+
+    pFile = fopen(szFileName, "w");
+    KGLOG_PROCESS_ERROR(pFile);
+
+    fprintf(pFile, "Global strt size: %u/%d\n", uNuse, uSize);
+
+    for (int i= 0; i < uSize; i++)
+    {
+        GCObject *p = pST->hash[i];
+        while (p)
+        {  // for each node in the list
+            GCObject *next = p->gch.next;  // save next
+            fprintf(pFile, "%s\n", getstr(gco2ts(p)));
+            p = next;
+        }
+    }
+
+    fclose(pFile);
+    pFile = NULL;
+
+Exit0:
+    if (pFile)
+    {
+        fclose(pFile);
+        pFile = NULL;
+    }
 }
 
 // create a new table associated to the specified metatable and save it to gt[dwScriptID]

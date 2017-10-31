@@ -116,6 +116,7 @@ public:
     KG_LuaScriptData *GetScriptData(DWORD dwScriptId);                                                      // get associated data of script.
     lua_State *       GetLuaState();                                                                        // get lua_State instance.
 
+    void DumpStrt() const;
 
 private:
     bool _AssociateScriptToLua(DWORD dwScriptID);

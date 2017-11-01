@@ -37,9 +37,11 @@ public:
     int  SeekBegin  (LONG lOffset);
     int  SeekCurrent(LONG lOffset);
 
-    LONG Read         (char * const cpBuff, LONG lBuffSize, LONG lReadSize);
-    LONG ReadTextLine (char * const cpBuff, LONG lBuffSize, LONG lReadSize);
+    LONG Read        (char * const cpBuff, LONG lBuffSize, LONG lReadSize);
+    LONG ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize);
+
     LONG Write        (const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize);
+    LONG WriteFormat  (const char * const pszFormat, ...);
     LONG WriteLine    (const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize);
     LONG WriteTextLine(const char * const cszText, LONG lTextSize, LONG lWriteSize);
 };

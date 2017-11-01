@@ -309,6 +309,24 @@ Exit0:
     return lResult;
 }
 
+LONG KG_File::WriteFormat(const char * const pszFormat, ...)
+{
+    LONG lResult     = -1;
+    LONG lWriteBytes = -1;
+
+    KG_PROCESS_PTR_ERROR(m_hFile);
+
+    va_list va;
+    va_start(va, pszFormat);
+    lWriteBytes = ::vfprintf(m_hFile, pszFormat, va);
+    va_end(va);
+    KG_PROCESS_ERROR(lWriteBytes >= 0);
+
+    lResult = lWriteBytes;
+Exit0:
+    return lResult;
+}
+
 LONG KG_File::WriteLine(const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize)
 {
     LONG lResult     = -1;

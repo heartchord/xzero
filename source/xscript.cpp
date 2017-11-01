@@ -437,6 +437,8 @@ void KG_LuaScriptV51::DumpStrt() const
 {
     int          nRetCode                     = 0;
     stringtable *pST                          = NULL;
+    GCObject    *pIter                        = NULL;
+    GCObject    *pNext                        = NULL;
     lu_int32     uNuse                        = 0;
     lu_int32     uSize                        = 0;
     time_t       nTime                        = ::time(NULL);
@@ -453,28 +455,24 @@ void KG_LuaScriptV51::DumpStrt() const
     KG_LocalTime(&nTime, &now);
     KG_CreatePath("lua_dump");
 
-    KG_Snprintf(
-        szFileName, sizeof(szFileName),
-        "lua_dump/strt_dump_%d%2.2d%2.2d-%2.2d%2.2d%2.2d.txt",
-        now.tm_year + 1900, now.tm_mon + 1, now.tm_mday,
-        now.tm_hour, now.tm_min, now.tm_sec
-    );
+    KG_Snprintf(szFileName, sizeof(szFileName), "lua_dump/strt_dump_%d%2.2d%2.2d-%2.2d%2.2d%2.2d.txt",
+        now.tm_year + 1900, now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec);
 
     nRetCode = fs.Open("szFileName", "wb");
     KG_PROCESS_ERROR(nRetCode);
 
-    //fprintf(pFile, "Global strt size: %u/%d\n", uNuse, uSize);
+    fs.WriteFormat("Global Strt Size: %u/%d\n", uNuse, uSize);
 
-    //for (int i= 0; i < uSize; i++)
-    //{
-    //    GCObject *p = pST->hash[i];
-    //    while (p)
-    //    {  // for each node in the list
-    //        GCObject *next = p->gch.next;  // save next
-    //        fprintf(pFile, "%s\n", getstr(gco2ts(p)));
-    //        p = next;
-    //    }
-    //}
+    for (lu_int32 i = 0; i < uSize; i++)
+    {
+        pIter = pST->hash[i];
+        while (pIter)
+        {  // for each node in the list
+            pNext = pIter->gch.next;
+            fs.WriteFormat("%s\n", getstr(gco2ts(pIter)));
+            pIter = pNext;
+        }
+    }
 
 Exit0:
     fs.Close();

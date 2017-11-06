@@ -202,6 +202,7 @@ bool KG_LuaScriptV51::LoadFromBuff(DWORD dwScriptId, const char *pszScriptName, 
     /* | chunk | */
     /* --------- */
 
+    // set t as env
     lua_setfenv(m_pLuaState, -2);
     /* --------- */
     /* | chunk | */
@@ -458,7 +459,7 @@ void KG_LuaScriptV51::DumpStrt() const
     KG_Snprintf(szFileName, sizeof(szFileName), "lua_dump/strt_dump_%d%2.2d%2.2d-%2.2d%2.2d%2.2d.txt",
         now.tm_year + 1900, now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec);
 
-    nRetCode = fs.Open("szFileName", "wb");
+    nRetCode = fs.Open(szFileName, "wb");
     KG_PROCESS_ERROR(nRetCode);
 
     fs.WriteFormat("Global Strt Size: %u/%d\n", uNuse, uSize);
@@ -481,30 +482,28 @@ Exit0:
 // create a new table associated to the specified metatable and save it to gt[dwScriptID]
 bool KG_LuaScriptV51::_AssociateScriptToLua(DWORD dwScriptId)
 {
-    bool bResult       = false;
-    int  nStackTopIdx  = 0;                                             // the index of the top element in the stack.
-    int  nMetaTableIdx = 0;                                             // the index of metatable in the stack.
+    bool bResult      = false;
+    int  nStackTopIdx = 0;                                              // the index of the top element in the stack.
 
     KG_PROCESS_ERROR(0 != dwScriptId);
 
     // create an empty table(t) on top of the stack.
     lua_newtable(m_pLuaState);                                          // creates a new empty table and pushes it onto the stack.
-    nStackTopIdx  = lua_gettop(m_pLuaState);
-    nMetaTableIdx = nStackTopIdx;
-    /* -------------------------- */
-    /* |   t   | <- nMetaTableIdx */
-    /* -------------------------- */
+    nStackTopIdx = lua_gettop(m_pLuaState);
+    /* ------------------------- */
+    /* |   t   | <- nStackTopIdx */
+    /* ------------------------- */
 
     // push the metatable(mt) on top of the stack.
     lua_rawgeti(m_pLuaState, LUA_REGISTRYINDEX, m_nMetaTableRIdx);      // pushes onto the stack the value t[n], where t is the table at the given index, n = m_nMTRef.
-    /* -------------------------- */
-    /* |   mt  |                  */
-    /* -------------------------  */
-    /* |   t   | <- nMetaTableIdx */
-    /* -------------------------- */
+    /* ------------------------- */
+    /* |   mt  |                 */
+    /* ------------------------- */
+    /* |   t   | <- nStackTopIdx */
+    /* ------------------------- */
 
     // pop the metatable(mt) and set it as the new metatable of t.
-    lua_setmetatable(m_pLuaState, nMetaTableIdx);                       // pops a table from the stack and sets it as the new metatable for the value at the given index.
+    lua_setmetatable(m_pLuaState, nStackTopIdx);                        // pops a table from the stack and sets it as the new metatable for the value at the given index.
     /* -------------- */
     /* |   t   | <= mt*/
     /* -------------- */

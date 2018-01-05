@@ -5,6 +5,7 @@
 #include "internal/xpath.h"
 #include "internal/xatom.h"
 #include "internal/xscript.h"
+#include "internal/xpointer.h"
 #include "internal/xmempool.h"
 #include "internal/xpattern.h"
 #include "internal/xdelegate.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef WIN32                                                            // windows platform
+#ifdef _WIN32                                                            // windows platform
     #define KG_PLATFORM_NAME "windows"
     #define KG_PLATFORM_WINDOWS
 

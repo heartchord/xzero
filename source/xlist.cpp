@@ -3,6 +3,76 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
+#ifdef KG_IN_64BIT_MODE                                                 // [ 64-bit mode ]
+
+PKG_InterlockedListHead KG_InitInterlockedList(PKG_InterlockedListHead pListHead)
+{
+    if (!pListHead)
+    {
+        pListHead = new KG_InterlockedListHead;
+    }
+
+    _KG_InterlockedListHead head;
+    head.m_pNext    = 0;
+    head.m_nOpTimes = 0;
+    pListHead->store(head);
+
+    return pListHead;
+}
+
+PKG_InterlockedListNode KG_PushNodeToInterlockedList(PKG_InterlockedListHead pListHead, PKG_InterlockedListNode pListNode)
+{
+    _KG_InterlockedListHead oldHead = pListHead->load();
+    _KG_InterlockedListHead newHead;
+
+    for(;;)
+    {
+        newHead.m_pNext    = (uint64_t)pListNode;
+        pListNode->m_pNext = (PKG_InterlockedListNode)oldHead.m_pNext;
+        newHead.m_nOpTimes = oldHead.m_nOpTimes + 1;
+
+        if (pListHead->compare_exchange_weak(oldHead, newHead))
+        {
+            break;
+        }
+    }
+    return (PKG_InterlockedListNode)oldHead.m_pNext;
+}
+
+PKG_InterlockedListNode KG_PopNodeFromInterlockedList(PKG_InterlockedListHead pListHead)
+{
+    PKG_InterlockedListNode pListNode = NULL;
+    _KG_InterlockedListHead oldHead   = pListHead->load();
+    _KG_InterlockedListHead newHead;
+    
+
+    if (0 == oldHead.m_pNext)
+    {
+        return NULL;
+    }
+
+    for (;;)
+    {
+        if (0 == oldHead.m_pNext)
+        {
+            break;
+        }
+
+        pListNode          = (PKG_InterlockedListNode)oldHead.m_pNext;
+        newHead.m_pNext    = (uint64_t)pListNode->m_pNext;
+        newHead.m_nOpTimes = oldHead.m_nOpTimes + 1;
+
+        if (pListHead->compare_exchange_weak(oldHead, newHead))
+        {
+            break;
+        }
+    }
+
+    return (PKG_InterlockedListNode)oldHead.m_pNext;
+}
+
+#else                                                                   // [ 32-bit mode ]
+
 #if (defined(_MSC_VER) || defined(__ICL))                               // ms compiler or intel compiler
 
 /*------------------------------------------------------------------------------------------------------------------*/
@@ -236,6 +306,8 @@ PKG_InterlockedListNode KG_PopNodeFromInterlockedList(PKG_InterlockedListHead pL
 {
     return KG_PopNode(pListHead);
 }
+
+#endif // KG_IN_64BIT_MODE
 
 KG_ListNode::KG_ListNode()
 {

@@ -2,9 +2,32 @@
 
 #include "xpublic.h"
 
+#include <atomic>
 #include <memory>
 
 KG_NAMESPACE_BEGIN(xzero)
+
+#ifdef KG_IN_64BIT_MODE                                                 // [ 64-bit mode ]
+
+#pragma pack(push)                                                      // save current alignment
+#pragma pack(8)                                                         // change to 8-bytes alignment
+
+typedef struct KG_InterlockedListNode
+{
+    KG_InterlockedListNode *m_pNext;                                    // pointer to next node
+}*PKG_InterlockedListNode;
+
+struct _KG_InterlockedListHead
+{
+    uint64_t m_pNext    : 48;                                           // pointer to KG_InterlockedListNode. AMD64 cpu architecture uses 48-bit to store address.
+    uint64_t m_nOpTimes : 16;                                           // op times, the call times of 'pop' and 'push' functions
+};
+typedef std::atomic<struct _KG_InterlockedListHead> KG_InterlockedListHead;
+typedef KG_InterlockedListHead *                    PKG_InterlockedListHead;
+
+#pragma pack(pop)                                                       // reset to saved alignment
+
+#else                                                                   // [ 32-bit mode ]
 
 #pragma pack(push)                                                      // save current alignment
 #pragma pack(4)                                                         // change to 4-bytes alignment
@@ -26,6 +49,8 @@ typedef union KG_InterlockedListHead
 }*PKG_InterlockedListHead;
 
 #pragma pack(pop)                                                       // reset to saved alignment
+
+#endif // KG_IN_64BIT_MODE
 
 PKG_InterlockedListHead KG_InitInterlockedList       (PKG_InterlockedListHead pListHead = NULL);
 PKG_InterlockedListNode KG_PushNodeToInterlockedList (PKG_InterlockedListHead pListHead, PKG_InterlockedListNode pListNode);

@@ -4,14 +4,14 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-void KG_DebugPrint(const char *pFmt, ...)
+void KG_DebugPrint(const char *pszFmt, ...)
 {
 #ifdef _DEBUG
     char buff[KG_DEBUG_DEFAULTBUFFSIZE];
 
     va_list va;
-    va_start(va, pFmt);
-    ::vsprintf(buff, pFmt, va);
+    va_start(va, pszFmt);
+    ::vsprintf(buff, pszFmt, va);
     va_end(va);
 
 #ifdef KG_PLATFORM_WINDOWS                                              // windows platform
@@ -22,14 +22,14 @@ void KG_DebugPrint(const char *pFmt, ...)
 #endif
 }
 
-void KG_DebugPrintln(const char *pFmt, ...)
+void KG_DebugPrintln(const char *pszFmt, ...)
 {
 #ifdef _DEBUG
     char buff[KG_DEBUG_DEFAULTBUFFSIZE];
 
     va_list va;
-    va_start(va, pFmt);
-    ::vsprintf(buff, pFmt, va);
+    va_start(va, pszFmt);
+    ::vsprintf(buff, pszFmt, va);
     va_end(va);
 
     ::strcat(buff, "\n");
@@ -42,13 +42,13 @@ void KG_DebugPrintln(const char *pFmt, ...)
 #endif
 }
 
-void KG_DebugMessageBox(const char *pMsg, ...)
+void KG_DebugMessageBox(const char *pszFmt, ...)
 {
     char szMsg[KG_DEBUG_DEFAULTBUFFSIZE];
 
     va_list va;
-    va_start(va, pMsg);
-    ::vsprintf(szMsg, pMsg, va);
+    va_start(va, pszFmt);
+    ::vsprintf(szMsg, pszFmt, va);
     va_end(va);
 
     KG_DebugPrintln(szMsg);
@@ -67,7 +67,7 @@ void KG_DebugMessageBox(const char *pMsg, ...)
 #endif // KG_PLATFORM_WINDOWS
 }
 
-void KG_PrintlnInHex(void *pvMsg, const size_t uBytes)
+void KG_PrintlnInHex(void *pvMsg, size_t uBytes)
 {
     bool           bResult = false;
     unsigned char *p       = NULL;
@@ -89,9 +89,9 @@ Exit0:
     return;
 }
 
-void KG_AssertFailed(const char *pCondition, const char *pFileName, int nLineNum)
+void KG_AssertFailed(const char *pszCondition, const char *pszFileName, int nLineNum)
 {
-    KG_DebugMessageBox("[ASSERT FAILED] : Condition - %s, File - %s, Line - %i", pCondition, pFileName, nLineNum);
+    KG_DebugMessageBox("[ASSERT FAILED] : Condition - %s, File - %s, Line - %i", pszCondition, pszFileName, nLineNum);
     assert(0);
 }
 

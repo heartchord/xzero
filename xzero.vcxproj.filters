@@ -62,9 +62,6 @@
     <ClInclude Include="include\internal\xtime.h">
       <Filter>include\internal</Filter>
     </ClInclude>
-    <ClInclude Include="include\internal\xatom.h">
-      <Filter>include\internal</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\xcode.cpp">

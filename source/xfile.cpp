@@ -6,28 +6,40 @@
 
 # pragma warning(disable: 4996)
 
+#ifdef KG_PLATFORM_WINDOWS                                              // windows platform
+
+const char l_pszFileNewLine[3] = "\r\n";
+const int  l_nFileNewLineLen   = 2;
+
+#else                                                                   // linux platform
+
+const char l_pszFileNewLine[2] = "\n";
+const int  l_nFileNewLineLen = 1;
+
+#endif // KG_PLATFORM_WINDOWS
+
 KG_NAMESPACE_BEGIN(xzero)
 
-int KG_OpenFileSafely(FILE *&fp, const char * const cszFile, const char * const cszMode)
+bool KG_OpenFileSafely(FILE *&fp, const char *pszFile, const char *pszMode)
 {
-    int nResult = false;
+    bool bResult = false;
 
-    KG_PROCESS_C_STR_ERROR(cszFile);
-    KG_PROCESS_C_STR_ERROR(cszMode);
+    KG_PROCESS_C_STR_ERROR(pszFile);
+    KG_PROCESS_C_STR_ERROR(pszMode);
 
     KG_PROCESS_ERROR(NULL == fp && "[ERROR] File handle has been used!");
-    fp = ::fopen(cszFile, cszMode);
+    fp = ::fopen(pszFile, pszMode);
     KG_PROCESS_ERROR(NULL != fp && "[ERROR] Open file failed!");
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_CloseFileSafely(FILE *&fp)
+bool KG_CloseFileSafely(FILE *&fp)
 {
-    int nResult  = false;
-    int nRetCode = 0;
+    bool bResult  = false;
+    int  nRetCode = 0;
 
     KG_PROCESS_SUCCESS(NULL == fp);
 
@@ -36,9 +48,9 @@ int KG_CloseFileSafely(FILE *&fp)
     fp = NULL;
 
 Exit1:
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
 KG_File::KG_File() : m_hFile(NULL), m_bBinaryFile(false)
@@ -50,44 +62,44 @@ KG_File::~KG_File()
     Close();
 }
 
-int KG_File::Open(const char * const cszFile, const char * const cszMode)
+bool KG_File::Open(const char *pszFile, const char *pszMode)
 {
-    int nResult  = false;
-    int nRetCode = false;
+    bool bResult  = false;
+    int  nRetCode = false;
 
     m_bBinaryFile = false;
 
-    nRetCode = KG_OpenFileSafely(m_hFile, cszFile, cszMode);
+    nRetCode = KG_OpenFileSafely(m_hFile, pszFile, pszMode);
     KG_PROCESS_ERROR(nRetCode);
 
-    if (::strchr(cszMode, 'b'))
+    if (::strchr(pszMode, 'b'))
     {
         m_bBinaryFile = true;
     }
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_File::Flush()
+bool KG_File::Flush()
 {
-    int nResult  = false;
-    int nRetCode = 0;
+    bool bResult  = false;
+    int  nRetCode = 0;
 
     KG_PROCESS_PTR_ERROR(m_hFile);
     nRetCode = ::fflush(m_hFile);
     KG_PROCESS_ERROR(0 == nRetCode);
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_File::Close()
+bool KG_File::Close()
 {
-    int nResult  = false;
-    int nRetCode = false;
+    bool bResult  = false;
+    int  nRetCode = false;
 
     KG_PROCESS_SUCCESS(NULL == m_hFile);
 
@@ -95,9 +107,9 @@ int KG_File::Close()
     KG_PROCESS_ERROR(nRetCode);
 
 Exit1:
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
 LONG KG_File::Size() const
@@ -141,29 +153,29 @@ Exit0:
     return lResult;
 }
 
-int KG_File::IsEof() const
+bool KG_File::IsEof() const
 {
-    int nResult  = false;
-    int nRetCode = 0;
+    bool bResult  = false;
+    int  nRetCode = 0;
 
     KG_PROCESS_PTR_ERROR(m_hFile);
 
     nRetCode = ::feof(m_hFile);
     KG_PROCESS_ERROR(0 != nRetCode);
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_File::IsOpen() const
+bool KG_File::IsOpen() const
 {
     return NULL != m_hFile;
 }
 
-int KG_File::SeekEnd(LONG lOffset)
+bool KG_File::SeekEnd(LONG lOffset)
 {
-    int  nResult  = false;
+    bool bResult  = false;
     int  nRetCode = 0;
     LONG lSize    = -1;
 
@@ -176,14 +188,14 @@ int KG_File::SeekEnd(LONG lOffset)
     nRetCode = ::fseek(m_hFile, -lOffset, SEEK_END);
     KG_PROCESS_ERROR(0 == nRetCode);
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_File::SeekBegin(LONG lOffset)
+bool KG_File::SeekBegin(LONG lOffset)
 {
-    int  nResult  = false;
+    bool bResult  = false;
     int  nRetCode = 0;
     LONG lSize    = -1;
 
@@ -196,14 +208,14 @@ int KG_File::SeekBegin(LONG lOffset)
     nRetCode = ::fseek(m_hFile, lOffset, SEEK_SET);
     KG_PROCESS_ERROR(0 == nRetCode);
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-int KG_File::SeekCurrent(LONG lOffset)
+bool KG_File::SeekCurrent(LONG lOffset)
 {
-    int  nResult  = false;
+    bool bResult  = false;
     int  nRetCode = 0;
     LONG lSize    = -1;
     LONG lCurPos  = -1;
@@ -221,22 +233,22 @@ int KG_File::SeekCurrent(LONG lOffset)
     nRetCode = ::fseek(m_hFile, lOffset, SEEK_CUR);
     KG_PROCESS_ERROR(0 == nRetCode);
 
-    nResult = true;
+    bResult = true;
 Exit0:
-    return nResult;
+    return bResult;
 }
 
-LONG KG_File::Read(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
+LONG KG_File::Read(char *pBuff, LONG lBuffSize, LONG lReadSize)
 {
     LONG lResult    = -1;
     int  nRetCode   = 0;
     LONG lReadBytes = -1;
 
-    KG_PROCESS_PTR_ERROR(cpBuff);
+    KG_PROCESS_PTR_ERROR(pBuff);
     KG_PROCESS_PTR_ERROR(m_hFile);
     KG_PROCESS_ERROR(lBuffSize > 0 && lReadSize > 0 && lReadSize <= lBuffSize);
 
-    lReadBytes = ::fread(cpBuff, 1, lReadSize, m_hFile);
+    lReadBytes = (LONG)::fread(pBuff, 1, lReadSize, m_hFile);
     nRetCode   = ::ferror(m_hFile);
 
     KG_PROCESS_ERROR(0 == nRetCode);
@@ -247,7 +259,7 @@ Exit0:
     return lResult;
 }
 
-LONG KG_File::ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
+LONG KG_File::ReadTextLine(char *pBuff, LONG lBuffSize, LONG lReadSize)
 {
     LONG   lResult    = -1;
     int    nRetCode   = 0;
@@ -256,12 +268,12 @@ LONG KG_File::ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
     char * pTextLine  = NULL;
     char * pNewLine   = NULL;
 
-    KG_PROCESS_PTR_ERROR(cpBuff);
+    KG_PROCESS_PTR_ERROR(pBuff);
     KG_PROCESS_PTR_ERROR(m_hFile);
     KG_PROCESS_ERROR(!m_bBinaryFile);
     KG_PROCESS_ERROR(lBuffSize > 0 && lReadSize > 0 && lReadSize <= lBuffSize);
 
-    pTextLine = ::fgets(cpBuff, lReadSize, m_hFile);
+    pTextLine = ::fgets(pBuff, lReadSize, m_hFile);
     nRetCode  = ::ferror(m_hFile);
 
     KG_PROCESS_ERROR(0 == nRetCode);
@@ -272,17 +284,17 @@ LONG KG_File::ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize)
     }
 
     // process '\r' and '\n' :  mac - '\r', unix - '\n', windows - '\r\n'
-    lReadBytes = ::strnlen(pTextLine, lReadSize);
+    lReadBytes = (LONG)::strnlen(pTextLine, lReadSize);
     nCurPos    = lReadBytes - 1;
 
     for (; nCurPos >= 0; nCurPos--)
     {
-        if ('\r' != cpBuff[nCurPos] && '\n' != cpBuff[nCurPos])
+        if ('\r' != pBuff[nCurPos] && '\n' != pBuff[nCurPos])
         {
             break;
         }
 
-        cpBuff[nCurPos] = '\0';
+        pBuff[nCurPos] = '\0';
         lReadBytes--;
     }
 
@@ -292,16 +304,16 @@ Exit0:
     return lResult;
 }
 
-LONG KG_File::Write(const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize)
+LONG KG_File::Write(const char *pBuff, LONG lBuffSize, LONG lWriteSize)
 {
     LONG lResult     = -1;
     LONG lWriteBytes = -1;
 
     KG_PROCESS_PTR_ERROR(m_hFile);
-    KG_PROCESS_PTR_ERROR(cpcBuff);
+    KG_PROCESS_PTR_ERROR(pBuff);
     KG_PROCESS_ERROR(lBuffSize > 0 && lWriteSize > 0 && lWriteSize <= lBuffSize);
 
-    lWriteBytes = ::fwrite(cpcBuff, 1, lWriteSize, m_hFile);
+    lWriteBytes = (LONG)::fwrite(pBuff, 1, lWriteSize, m_hFile);
     KG_PROCESS_ERROR(lWriteBytes <= lWriteSize);
 
     lResult = lWriteBytes;
@@ -309,7 +321,46 @@ Exit0:
     return lResult;
 }
 
-LONG KG_File::WriteFormat(const char * const pszFormat, ...)
+LONG KG_File::WriteLine(const char *pBuff, LONG lBuffSize, LONG lWriteSize)
+{
+    LONG lResult     = -1;
+    int  nRetCode    = 0;
+    LONG lWriteBytes = -1;
+
+    lWriteBytes = Write(pBuff, lBuffSize, lWriteSize);
+    KG_PROCESS_ERROR(-1 != lWriteBytes);
+
+    nRetCode = ::fprintf(m_hFile, "\r\n");
+    KG_PROCESS_ERROR(nRetCode > 0);
+
+    lResult = lWriteBytes;
+Exit0:
+    return lResult;
+}
+
+LONG KG_File::WriteTextLine(const char *pszText, LONG lTextSize, LONG lWriteSize)
+{
+    LONG lResult     = -1;
+    int  nRetCode    = 0;
+    LONG lWriteBytes = -1;
+
+    KG_PROCESS_PTR_ERROR(m_hFile);
+    KG_PROCESS_PTR_ERROR(pszText);
+    KG_PROCESS_ERROR(!m_bBinaryFile);
+    KG_PROCESS_ERROR(lTextSize > 0 && lWriteSize > 0 && lWriteSize <= lTextSize);
+
+    lWriteBytes = (LONG)::fwrite(pszText, 1, lWriteSize, m_hFile);
+    KG_PROCESS_ERROR(lWriteBytes <= lWriteSize);
+
+    nRetCode = ::fprintf(m_hFile, "\r\n");
+    KG_PROCESS_ERROR(nRetCode > 0);
+
+    lResult = lWriteBytes;
+Exit0:
+    return lResult;
+}
+
+LONG KG_File::WriteFormat(const char *pszFormat, ...)
 {
     LONG lResult     = -1;
     LONG lWriteBytes = -1;
@@ -327,49 +378,144 @@ Exit0:
     return lResult;
 }
 
-LONG KG_File::WriteLine(const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize)
-{
-    LONG lResult     = -1;
-    int  nRetCode    = 0;
-    LONG lWriteBytes = -1;
-
-    lWriteBytes = Write(cpcBuff, lBuffSize, lWriteSize);
-    KG_PROCESS_ERROR(-1 != lWriteBytes);
-
-    nRetCode = ::fprintf(m_hFile, "\r\n");
-    KG_PROCESS_ERROR(nRetCode > 0);
-
-    lResult = lWriteBytes;
-Exit0:
-    return lResult;
-}
-
-LONG KG_File::WriteTextLine(const char * const cszText, LONG lTextSize, LONG lWriteSize)
-{
-    LONG lResult     = -1;
-    int  nRetCode    = 0;
-    LONG lWriteBytes = -1;
-
-    KG_PROCESS_PTR_ERROR(m_hFile);
-    KG_PROCESS_PTR_ERROR(cszText);
-    KG_PROCESS_ERROR(!m_bBinaryFile);
-    KG_PROCESS_ERROR(lTextSize > 0 && lWriteSize > 0 && lWriteSize <= lTextSize);
-
-    lWriteBytes = ::fwrite(cszText, 1, lWriteSize, m_hFile);
-    KG_PROCESS_ERROR(lWriteBytes <= lWriteSize);
-
-    nRetCode = ::fprintf(m_hFile, "\r\n");
-    KG_PROCESS_ERROR(nRetCode > 0);
-
-    lResult = lWriteBytes;
-Exit0:
-    return lResult;
-}
-
 KG_IniFile::KG_IniFile()
 {
-    m_nFileBuffOffset = 0;
+    m_lFileBuffOffset = 0;
     m_pLatestSection  = NULL;
+}
+
+KG_IniFile::~KG_IniFile()
+{
+    Release();
+}
+
+bool KG_IniFile::Load(KG_File *pFile)
+{
+    bool  bResult   = false;
+    int   nRetCode  = false;
+    LONG  lFileSize = 0;
+    LONG  lReadSize = 0;
+    char *pBuf      = NULL;
+
+    KG_PROCESS_PTR_ERROR(pFile);
+
+    nRetCode = pFile->IsOpen();
+    KG_PROCESS_ERROR(nRetCode);
+
+    lFileSize = pFile->Size();
+    KG_PROCESS_ERROR(lFileSize > 0);
+
+    pBuf = ::new char[lFileSize + 4];
+    KG_PROCESS_PTR_ERROR(pBuf);
+
+    lReadSize = pFile->Read(pBuf, lFileSize + 4, lFileSize);
+    KG_PROCESS_ERROR(lReadSize == lFileSize);
+
+    Release();
+    CreateIniLink(pBuf, lFileSize);
+
+    bResult = true;
+Exit0:
+    KG_DeleteArrayPtrSafely(pBuf);
+    return bResult;
+}
+
+bool KG_IniFile::Save(KG_File *pFile)
+{
+    bool               bResult    = false;
+    int                nRetCode   = false;
+    LONG               lWriteSize = 0;
+    int                nLen       = 0;
+    PKG_IniFileSecNode pSecNode   = m_RootSection.m_pNext;
+    PKG_IniFileKeyNode pKeyNode   = NULL;
+
+    KG_PROCESS_PTR_ERROR(pFile);
+
+    nRetCode = pFile->IsOpen();
+    KG_PROCESS_ERROR(nRetCode);
+
+    while (NULL != pSecNode)
+    {
+        nLen       = (int)::strlen(pSecNode->m_pName);
+        lWriteSize = pFile->Write(pSecNode->m_pName, nLen, nLen);
+        KG_PROCESS_ERROR(lWriteSize == nLen);
+
+        lWriteSize = pFile->Write(l_pszFileNewLine, l_nFileNewLineLen, l_nFileNewLineLen);
+        KG_PROCESS_ERROR(lWriteSize == l_nFileNewLineLen);
+
+        pKeyNode = pSecNode->m_RootKey.m_pNext;
+        while (NULL != pKeyNode)
+        {
+            nLen       = (int)::strlen(pKeyNode->m_pName);
+            lWriteSize = pFile->Write(pKeyNode->m_pName, nLen, nLen);
+            KG_PROCESS_ERROR(lWriteSize == nLen);
+
+            lWriteSize = pFile->Write("=", 1, 1);
+            KG_PROCESS_ERROR(lWriteSize == 1);
+
+            nLen       = (int)::strlen(pKeyNode->m_pValue);
+            lWriteSize = pFile->Write(pKeyNode->m_pValue, nLen, nLen);
+            KG_PROCESS_ERROR(lWriteSize == nLen);
+
+            lWriteSize = pFile->Write(l_pszFileNewLine, l_nFileNewLineLen, l_nFileNewLineLen);
+            KG_PROCESS_ERROR(lWriteSize == l_nFileNewLineLen);
+
+            pKeyNode = pKeyNode->m_pNext;
+        }
+
+        lWriteSize = pFile->Write(l_pszFileNewLine, l_nFileNewLineLen, l_nFileNewLineLen);
+        KG_PROCESS_ERROR(lWriteSize == l_nFileNewLineLen);
+
+        pSecNode = pSecNode->m_pNext;
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::Load(const char *pszFilePath)
+{
+    bool    bResult  = 0;
+    int     nRetCode = false;
+    KG_File sFile;
+
+    KG_PROCESS_C_STR_ERROR(pszFilePath);
+
+    nRetCode = sFile.Open(pszFilePath, "rb");
+    KG_PROCESS_ERROR(nRetCode);
+
+    nRetCode = Load(&sFile);
+    KG_PROCESS_ERROR(nRetCode);
+
+    bResult = true;
+Exit0:
+    nRetCode = sFile.Close();
+    KG_ASSERT(nRetCode);
+
+    return bResult;
+}
+
+bool KG_IniFile::Save(const char *pszFilePath)
+{
+    bool    bResult  = false;
+    int     nRetCode = false;
+    KG_File sFile;
+
+    KG_PROCESS_C_STR_ERROR(pszFilePath);
+
+    nRetCode = sFile.Open(pszFilePath, "wb");
+    KG_PROCESS_ERROR(nRetCode);
+
+    nRetCode = Save(&sFile);
+    KG_PROCESS_ERROR(nRetCode);
+
+    bResult = true;
+Exit0:
+    nRetCode = sFile.Close();
+    KG_ASSERT(nRetCode);
+
+    return bResult;
 }
 
 bool KG_IniFile::IsKeyNameChar(char c) const
@@ -421,10 +567,10 @@ bool KG_IniFile::CreateIniLink(char *pBuff, int nBuffSize)
 
     KG_PROCESS_PTR_ERROR(pBuff);
 
-    m_nFileBuffOffset = 0;
-    while (m_nFileBuffOffset < nBuffSize)
+    m_lFileBuffOffset = 0;
+    while (m_lFileBuffOffset < nBuffSize)
     {
-        pStrLine = &pBuff[m_nFileBuffOffset];
+        pStrLine = &pBuff[m_lFileBuffOffset];
 
         nRetCode = GetLineOfBuff(pBuff, nBuffSize);
         if (!nRetCode)
@@ -464,25 +610,25 @@ bool KG_IniFile::GetLineOfBuff(char *pBuff, int nBuffSize)
 
     KG_PROCESS_PTR_ERROR(pBuff);
     KG_PROCESS_ERROR(nBuffSize > 0);
-    KG_PROCESS_ERROR(m_nFileBuffOffset < nBuffSize);
+    KG_PROCESS_ERROR(m_lFileBuffOffset < nBuffSize);
 
-    while (0x0D != pBuff[m_nFileBuffOffset] && 0x0A != pBuff[m_nFileBuffOffset])
+    while (0x0D != pBuff[m_lFileBuffOffset] && 0x0A != pBuff[m_lFileBuffOffset])
     { // '\r' = 0x0D '\n' = 0x0A
-        m_nFileBuffOffset++;
-        if (m_nFileBuffOffset >= nBuffSize)
+        m_lFileBuffOffset++;
+        if (m_lFileBuffOffset >= nBuffSize)
         {
             break;
         }
     }
-    nCurOffset = m_nFileBuffOffset;
+    nCurOffset = m_lFileBuffOffset;
 
-    if (0x0D == pBuff[m_nFileBuffOffset] && 0x0A == pBuff[m_nFileBuffOffset + 1])
+    if (0x0D == pBuff[m_lFileBuffOffset] && 0x0A == pBuff[m_lFileBuffOffset + 1])
     { // "\r\n"
-        m_nFileBuffOffset += 2;
+        m_lFileBuffOffset += 2;
     }
     else
     { // "\n"
-        m_nFileBuffOffset += 1;
+        m_lFileBuffOffset += 1;
     }
 
     pBuff[nCurOffset] = '\0';
@@ -683,7 +829,7 @@ bool KG_IniFile::SetKeyValue(const char *pszSecName, const char *pszKeyName, con
 
         pNextSecNode->m_dwId = dwId;
 
-        nLen = ::strlen(pSecName);
+        nLen = (int)::strlen(pSecName);
         pNextSecNode->m_pName = ::new char[nLen + 1];                   // Include '\0'
         KG_Strncpy(pNextSecNode->m_pName, pSecName, nLen);
 
@@ -717,7 +863,7 @@ bool KG_IniFile::SetKeyValue(const char *pszSecName, const char *pszKeyName, con
 
         pNextKeyNode->m_dwId = dwId;                                    // m_uId
 
-        nLen = ::strlen(pszKeyName);
+        nLen = (int)::strlen(pszKeyName);
         pNextKeyNode->m_pName = ::new char[nLen + 1];                   // Include '\0'
         KG_Strncpy(pNextKeyNode->m_pName, pszKeyName, nLen);
         pNextKeyNode->m_pValue = NULL;
@@ -727,7 +873,7 @@ bool KG_IniFile::SetKeyValue(const char *pszSecName, const char *pszKeyName, con
 
     // replace the old value with new
     KG_DeleteArrayPtrSafely(pNextKeyNode->m_pValue);
-    nLen = ::strlen(pszKeyValue);
+    nLen = (int)::strlen(pszKeyValue);
     pNextKeyNode->m_pValue = ::new char[nLen + 1];                     // Include '\0'
     KG_Strncpy(pNextKeyNode->m_pValue, pszKeyValue, nLen);
 

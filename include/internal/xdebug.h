@@ -17,11 +17,11 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-void KG_DebugPrint     (const char *pFmt, ...);
-void KG_DebugPrintln   (const char *pFmt, ...);
-void KG_DebugMessageBox(const char *pMsg, ...);
-void KG_PrintlnInHex   (void *pvMsg, const size_t uBytes);
-void KG_AssertFailed   (const char *pCondition, const char *pFileName, int nLineNum);
+void KG_DebugPrint     (const char *pszFmt, ...);
+void KG_DebugPrintln   (const char *pszFmt, ...);
+void KG_DebugMessageBox(const char *pszFmt, ...);
+void KG_PrintlnInHex   (void *pvMsg, size_t uBytes);
+void KG_AssertFailed   (const char *pszCondition, const char *pszFileName, int nLineNum);
 
 class KG_CodeSegmentMemLeakDetect : private KG_UnCopyable
 {

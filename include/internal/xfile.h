@@ -10,8 +10,8 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
-int KG_OpenFileSafely (FILE *&fp, const char * const cszFile, const char * const cszMode);
-int KG_CloseFileSafely(FILE *&fp);
+bool KG_OpenFileSafely (FILE *&fp, const char *pszFile, const char *pszMode);
+bool KG_CloseFileSafely(FILE *&fp);
 
 class KG_File : private KG_UnCopyable
 {
@@ -24,26 +24,27 @@ public:
     ~KG_File();
 
 public:
-    int  Open(const char * const cszFile, const char * const cszMode);
-    int  Flush();
-    int  Close();
+    bool  Open(const char *pszFile, const char *pszMode);
+    bool  Flush();
+    bool  Close();
 
-    LONG Size()   const;
-    LONG Tell()   const;
-    int  IsEof()  const;
-    int  IsOpen() const;
+    LONG  Size() const;
+    LONG  Tell() const;
+    bool  IsEof() const;
+    bool  IsOpen() const;
 
-    int  SeekEnd    (LONG lOffset);
-    int  SeekBegin  (LONG lOffset);
-    int  SeekCurrent(LONG lOffset);
+    bool  SeekEnd    (LONG lOffset);
+    bool  SeekBegin  (LONG lOffset);
+    bool  SeekCurrent(LONG lOffset);
 
-    LONG Read        (char * const cpBuff, LONG lBuffSize, LONG lReadSize);
-    LONG ReadTextLine(char * const cpBuff, LONG lBuffSize, LONG lReadSize);
+    LONG  Read        (char *pBuff, LONG lBuffSize, LONG lReadSize);
+    LONG  ReadTextLine(char *pBuff, LONG lBuffSize, LONG lReadSize);
 
-    LONG Write        (const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize);
-    LONG WriteFormat  (const char * const pszFormat, ...);
-    LONG WriteLine    (const char * const cpcBuff, LONG lBuffSize, LONG lWriteSize);
-    LONG WriteTextLine(const char * const cszText, LONG lTextSize, LONG lWriteSize);
+    LONG  Write        (const char *pBuff,   LONG lBuffSize, LONG lWriteSize);
+    LONG  WriteLine    (const char *pBuff,   LONG lBuffSize, LONG lWriteSize);
+    LONG  WriteTextLine(const char *pszText, LONG lTextSize, LONG lWriteSize);
+    LONG  WriteFormat  (const char *pszFormat, ...);
+    
 };
 
 struct KG_IniFileKeyNode
@@ -140,7 +141,7 @@ private:
     bool SetKeyValue(const char *pszSecName, const char *pszKeyName, const char *pszKeyValue);
 private:
     KG_IniFileSecNode  m_RootSection;                                   // section list
-    int                m_nFileBuffOffset;                               // file buffer offset
+    LONG               m_lFileBuffOffset;                               // file buffer offset
     PKG_IniFileSecNode m_pLatestSection;                                // the latest accessed section
 };
 

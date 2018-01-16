@@ -95,24 +95,24 @@ public:
 
     void Release();
 
-    bool IsSecExisted(const char *pszSecName) const;
-    bool IsKeyExisted(const char *pszSecName, const char *pszKeyName) const;
+    bool IsSecExisted(const char *pszSecName);
+    bool IsKeyExisted(const char *pszSecName, const char *pszKeyName);
 
-    bool GetNextSec(const char *pszSecName, char *pNextSecBuff, int nBuffLen) const;
-    bool GetNextKey(const char *pszSecName, const char *pszKeyName, char *pNextKeyBuff, int nBuffLen) const;
+    bool GetNextSec(const char *pszSecName, char *pNextSecBuff, int nBuffLen);
+    bool GetNextKey(const char *pszSecName, const char *pszKeyName, char *pNextKeyBuff, int nBuffLen);
 
-    int  GetSecCount() const;
-    int  GetKeyCount(const char *pszSecName) const;
+    int  GetSecCount();
+    int  GetKeyCount(const char *pszSecName);
 
     bool EraseSec(const char *pszSecName);
     bool EraseKey(const char *pszSecName, const char *pszKeyName);
 
-    bool GetStr   (const char *pszSecName, const char *pszKeyName, const char *pszDefault, char * pKeyValueBuff, int nBuffLen) const;
-    bool GetInt   (const char *pszSecName, const char *pszKeyName, int         nDefault,   int *  pnKeyValue ) const;
-    bool GetBool  (const char *pszSecName, const char *pszKeyName, bool        bDefault,   bool * pbKeyValue ) const;
-    bool GetLong  (const char *pszSecName, const char *pszKeyName, long        lDefault,   long * plKeyValue ) const;
-    bool GetFloat (const char *pszSecName, const char *pszKeyName, float       fDefault,   float *pfKeyValue ) const;
-    bool GetStruct(const char *pszSecName, const char *pszKeyName, void *      pvStruct,   int    nStructSize) const;
+    bool GetStr   (const char *pszSecName, const char *pszKeyName, const char *pszDefault, char * pKeyValueBuff, int nBuffLen);
+    bool GetInt   (const char *pszSecName, const char *pszKeyName, int         nDefault,   int *  pnKeyValue );
+    bool GetBool  (const char *pszSecName, const char *pszKeyName, bool        bDefault,   bool * pbKeyValue );
+    bool GetLong  (const char *pszSecName, const char *pszKeyName, long        lDefault,   long * plKeyValue );
+    bool GetFloat (const char *pszSecName, const char *pszKeyName, float       fDefault,   float *pfKeyValue );
+    bool GetStruct(const char *pszSecName, const char *pszKeyName, void *      pvStruct,   int    nStructSize);
 
     bool SetStr   (const char *pszSecName, const char *pszKeyName, const char *pszKeyValue);
     bool SetInt   (const char *pszSecName, const char *pszKeyName, int         nKeyValue  );
@@ -121,9 +121,9 @@ public:
     bool SetFloat (const char *pszSecName, const char *pszKeyName, float       fKeyValue  );
     bool SetStruct(const char *pszSecName, const char *pszKeyName, void *      pvStruct, int nStructSize);
 
-    bool GetMultiInt  (const char *pszSecName, const char *pszKeyName, int   pnKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
-    bool GetMultiLong (const char *pszSecName, const char *pszKeyName, long  plKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
-    bool GetMultiFloat(const char *pszSecName, const char *pszKeyName, float pfKeyValueArray[], int nArraySize, int *pnKeyValueCount) const;
+    bool GetMultiInt  (const char *pszSecName, const char *pszKeyName, int   pnKeyValueArray[], int nArraySize, int *pnKeyValueCount);
+    bool GetMultiLong (const char *pszSecName, const char *pszKeyName, long  plKeyValueArray[], int nArraySize, int *pnKeyValueCount);
+    bool GetMultiFloat(const char *pszSecName, const char *pszKeyName, float pfKeyValueArray[], int nArraySize, int *pnKeyValueCount);
 
     bool SetMultiInt  (const char *pszSecName, const char *pszKeyName, int   pnKeyValueArray[], int nKeyValueCount);
     bool SetMultiLong (const char *pszSecName, const char *pszKeyName, long  plKeyValueArray[], int nKeyValueCount);

@@ -4,6 +4,10 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
+extern const char *g_pszBoolStrPairs[6];
+extern const char *g_pszTrueStrList[3];
+extern const char *g_pszFalseStrList[3];
+
 bool KG_Strncpy       (char *pBuff, const char *pszStr, size_t uCount);
 int  KG_Snprintf      (char *pBuff, size_t uBuffSize, const char *pszFormat, ...);
 int  KG_Strcasecmp    (const char *pszStr1, const char *pszStr2);

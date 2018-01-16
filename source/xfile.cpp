@@ -518,6 +518,405 @@ Exit0:
     return bResult;
 }
 
+void KG_IniFile::Release()
+{
+    PKG_IniFileSecNode pNextSec = &m_RootSection;
+    PKG_IniFileSecNode pThisSec = pNextSec->m_pNext;
+    PKG_IniFileKeyNode pNextKey = NULL;
+    PKG_IniFileKeyNode pThisKey = NULL;
+
+    while (NULL != pThisSec)
+    {
+        pNextSec = pThisSec->m_pNext;
+        pNextKey = &pThisSec->m_RootKey;
+        pThisKey = pNextKey->m_pNext;
+
+        while (NULL != pThisKey)
+        {
+            pNextKey = pThisKey->m_pNext;
+            KG_DeleteArrayPtrSafely(pThisKey->m_pName);
+            KG_DeleteArrayPtrSafely(pThisKey->m_pValue);
+            KG_DeletePtrSafely(pThisKey);
+            pThisKey = pNextKey;
+        }
+
+        KG_DeleteArrayPtrSafely(pThisSec->m_pName);
+        KG_DeletePtrSafely(pThisSec);
+        pThisSec = pNextSec;
+    }
+
+    m_RootSection.m_pNext = NULL;
+    m_pLatestSection      = NULL;
+}
+
+bool KG_IniFile::IsSecExisted(const char *pszSecName)
+{
+    bool               bResult         = false;
+    int                nRetCode        = 0;
+    DWORD              dwId            = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode        = m_RootSection.m_pNext;
+    char szSection[KG_MAX_INI_SEC_LEN] = { '\0' };
+
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+
+    nRetCode = FormatSecName(szSection, sizeof(szSection), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+
+    dwId = KG_KSGStringHash(szSection);
+    KG_PROCESS_SUCCESS(NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId);
+
+    while (NULL != pSecNode)
+    {
+        if (dwId == pSecNode->m_dwId)
+        {
+            m_pLatestSection = pSecNode;
+            break;
+        }
+
+        pSecNode = pSecNode->m_pNext;
+    }
+
+Exit1:
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::IsKeyExisted(const char *pszSecName, const char *pszKeyName)
+{
+    bool               bResult         = false;
+    int                nRetCode        = 0;
+    DWORD              dwId            = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode        = NULL;
+    PKG_IniFileKeyNode pKeyNode        = NULL;
+    char szSection[KG_MAX_INI_SEC_LEN] = { '\0' };
+
+    KG_PROCESS_C_STR_ERROR(pszSecName);
+    KG_PROCESS_C_STR_ERROR(pszKeyName);
+
+    nRetCode = FormatSecName(szSection, sizeof(szSection), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+
+    // get proper section
+    dwId = KG_KSGStringHash(szSection);
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        pSecNode = m_pLatestSection;
+        goto Exit2;
+    }
+
+    pSecNode = m_RootSection.m_pNext;
+    while (NULL != pSecNode)
+    {
+        if (dwId == pSecNode->m_dwId)
+        {
+            m_pLatestSection = pSecNode;
+            break;
+        }
+
+        pSecNode = pSecNode->m_pNext;
+    }
+
+Exit2:
+    KG_PROCESS_PTR_ERROR(pSecNode);
+
+    dwId     = KG_KSGStringHash(pszKeyName);
+    pKeyNode = pSecNode->m_RootKey.m_pNext;
+    while (NULL != pKeyNode)
+    {
+        if (dwId == pKeyNode->m_dwId)
+        {
+            break;
+        }
+
+        pKeyNode = pKeyNode->m_pNext;
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetNextSec(const char *pszSecName, char *pNextSecBuff, int nBuffLen)
+{
+    bool               bResult         = false;
+    int                nRetCode        = 0;
+    DWORD              dwId            = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode        = NULL;
+    char szSection[KG_MAX_INI_SEC_LEN] = { '\0' };
+
+    KG_PROCESS_PTR_ERROR(pNextSecBuff);
+    KG_PROCESS_ERROR(nBuffLen >= KG_MAX_INI_SEC_LEN);
+
+    pNextSecBuff[0] = '\0';
+
+    if (NULL == pszSecName || '\0' == pszSecName[0])
+    { // get first section name
+        pSecNode = m_RootSection.m_pNext;
+        KG_PROCESS_PTR_ERROR(pSecNode);
+
+        nRetCode = ReverseSecName(pNextSecBuff, nBuffLen, pSecNode->m_pName);
+        KG_PROCESS_ERROR(nRetCode);
+        KG_PROCESS_SUCCESS(true);
+    }
+
+    nRetCode = FormatSecName(szSection, sizeof(szSection), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+
+    dwId = KG_KSGStringHash(szSection);
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        KG_PROCESS_PTR_ERROR_Q(m_pLatestSection->m_pNext);
+        nRetCode = ReverseSecName(pNextSecBuff, nBuffLen, m_pLatestSection->m_pNext->m_pName);
+        KG_PROCESS_ERROR(nRetCode);
+        KG_PROCESS_SUCCESS(true);
+    }
+
+    pSecNode = m_RootSection.m_pNext;
+    while (NULL != pSecNode)
+    {
+        if (dwId == pSecNode->m_dwId)
+        {
+            m_pLatestSection = pSecNode;
+            break;
+        }
+
+        pSecNode = pSecNode->m_pNext;
+    }
+
+    KG_PROCESS_PTR_ERROR_Q(pSecNode);
+    KG_PROCESS_PTR_ERROR_Q(pSecNode->m_pNext);
+
+    nRetCode = ReverseSecName(pNextSecBuff, nBuffLen, pSecNode->m_pNext->m_pName);
+    KG_PROCESS_ERROR(nRetCode);
+
+Exit1:
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetNextKey(const char *pszSecName, const char *pszKeyName, char *pNextKeyBuff, int nBuffLen)
+{
+    bool               bResult         = false;
+    int                nRetCode        = 0;
+    DWORD              dwId            = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode        = NULL;
+    PKG_IniFileKeyNode pKeyNode        = NULL;
+    char szSection[KG_MAX_INI_SEC_LEN] = { '\0' };
+
+    KG_PROCESS_PTR_ERROR(pNextKeyBuff);
+    KG_PROCESS_ERROR(nBuffLen >= KG_MAX_INI_SEC_LEN);
+
+    pNextKeyBuff[0] = '\0';
+
+    // get proper section
+    if (NULL == pszSecName || '\0' == pszSecName[0])
+    {
+        pSecNode = m_RootSection.m_pNext;
+        goto Exit2;
+    }
+
+    nRetCode = FormatSecName(szSection, sizeof(szSection), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+    dwId     = KG_KSGStringHash(szSection);
+
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        pSecNode = m_pLatestSection;
+        goto Exit2;
+    }
+
+    pSecNode = m_RootSection.m_pNext;
+    while (NULL != pSecNode)
+    {
+        if (dwId == pSecNode->m_dwId)
+        {
+            m_pLatestSection = pSecNode;
+            break;
+        }
+
+        pSecNode = pSecNode->m_pNext;
+    }
+
+
+Exit2:
+    KG_PROCESS_PTR_ERROR_Q(pSecNode);
+
+    if (NULL == pszKeyName || '\0' == pszKeyName[0])
+    { // get first key name
+        pKeyNode = pSecNode->m_RootKey.m_pNext;
+        KG_PROCESS_PTR_ERROR(pKeyNode);
+        KG_PROCESS_C_STR_ERROR(pKeyNode->m_pName);
+        ::strcpy(pNextKeyBuff, pKeyNode->m_pName);
+        KG_PROCESS_SUCCESS(true);
+    }
+
+    pKeyNode = pSecNode->m_RootKey.m_pNext;
+    dwId     = KG_KSGStringHash(pszKeyName);
+
+    while (NULL != pKeyNode)
+    {
+        if (dwId == pKeyNode->m_dwId)
+        {
+            break;
+        }
+
+        pKeyNode = pKeyNode->m_pNext;
+    }
+    KG_PROCESS_PTR_ERROR_Q(pKeyNode);
+    KG_PROCESS_PTR_ERROR_Q(pKeyNode->m_pNext);
+
+    pKeyNode = pKeyNode->m_pNext;
+    KG_PROCESS_C_STR_ERROR(pKeyNode->m_pName);
+    ::strcpy(pNextKeyBuff, pKeyNode->m_pName);
+
+Exit1:
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+int KG_IniFile::GetSecCount()
+{
+    int nResult = 0;
+    PKG_IniFileSecNode pSecNode = m_RootSection.m_pNext;
+
+    while (NULL != pSecNode)
+    {
+        nResult++;
+        pSecNode = pSecNode->m_pNext;
+    }
+
+    return nResult;
+}
+
+int KG_IniFile::GetKeyCount(const char *pszSecName)
+{
+    int                nResult         = 0;
+    int                nRetCode        = 0;
+    DWORD              dwId            = KG_INVALID_STR2ID;
+    PKG_IniFileSecNode pSecNode        = NULL;
+    PKG_IniFileKeyNode pKeyNode        = NULL;
+    char szSection[KG_MAX_INI_SEC_LEN] = { '\0' };
+
+    // get proper section
+    if (NULL == pszSecName || '\0' == pszSecName[0])
+    { // get first section
+        pSecNode = m_RootSection.m_pNext;
+        goto Exit2;
+    }
+
+    nRetCode = FormatSecName(szSection, sizeof(szSection), pszSecName);
+    KG_PROCESS_ERROR(nRetCode);
+    dwId     = KG_KSGStringHash(szSection);
+
+    if (NULL != m_pLatestSection && dwId == m_pLatestSection->m_dwId)
+    {
+        pSecNode = m_pLatestSection;
+        goto Exit2;
+    }
+
+    pSecNode = m_RootSection.m_pNext;
+    while (NULL != pSecNode)
+    {
+        if (dwId == pSecNode->m_dwId)
+        {
+            m_pLatestSection = pSecNode;
+            break;
+        }
+
+        pSecNode = pSecNode->m_pNext;
+    }
+Exit2:
+    KG_PROCESS_PTR_ERROR_Q(pSecNode);
+
+    pKeyNode = pSecNode->m_RootKey.m_pNext;
+    while (NULL != pKeyNode)
+    {
+        nResult++;
+        pKeyNode = pKeyNode->m_pNext;
+    }
+
+Exit0:
+    return nResult;
+}
+
+bool KG_IniFile::GetStr(const char *pszSecName, const char *pszKeyName, const char *pszDefault, char * pKeyValueBuff, int nBuffLen)
+{
+    bool bResult  = false;
+    int  nRetCode = 0;
+    int  nLen     = 0;
+
+    KG_PROCESS_PTR_ERROR(pszDefault);
+
+    nRetCode = GetKeyValue(pszSecName, pszKeyName, pKeyValueBuff, nBuffLen);
+    if (!nRetCode)
+    {
+        nLen = (int)::strlen(pszDefault);
+        KG_PROCESS_ERROR(nLen < nBuffLen);
+        KG_Strncpy(pKeyValueBuff, pszDefault, nLen);
+        KG_PROCESS_ERROR_Q(false);
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetInt(const char *pszSecName, const char *pszKeyName, int nDefault, int *pnKeyValue)
+{
+    bool bResult    = false;
+    int  nRetCode   = 0;
+    char szBuff[64] = { '\0' };
+
+    KG_PROCESS_PTR_ERROR(pnKeyValue);
+
+    nRetCode = GetKeyValue(pszSecName, pszKeyName, szBuff, sizeof(szBuff));
+    if (!nRetCode)
+    {
+        *pnKeyValue = nDefault;
+        KG_PROCESS_ERROR_Q(false);
+    }
+
+    *pnKeyValue = ::atoi(szBuff);
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
+bool KG_IniFile::GetBool(const char *pszSecName, const char *pszKeyName, bool bDefault, bool *pbKeyValue)
+{
+    bool bResult      = false;
+    int  nRetCode     = false;
+    char szBuff[16] = { '\0' };
+
+    KG_PROCESS_PTR_ERROR(pbKeyValue);
+
+    nRetCode = GetKeyValue(pszSecName, pszKeyName, szBuff, sizeof(szBuff));
+    if (!nRetCode)
+    {
+        *pbKeyValue = bDefault;
+        KG_PROCESS_ERROR_Q(false);
+    }
+
+    *pbKeyValue = false;
+    for (int i = 0; i < sizeof(g_pszTrueStrList) / sizeof(const char *); i++)
+    {
+        nRetCode = KG_Strcasecmp(szBuff, g_pszTrueStrList[i]);
+        if (0 == nRetCode)
+        {
+            *pbKeyValue = true;
+            break;
+        }
+    }
+
+    bResult = true;
+Exit0:
+    return bResult;
+}
+
 bool KG_IniFile::IsKeyNameChar(char c) const
 {
     if ( (c >= 'A' && c <= 'Z') ||

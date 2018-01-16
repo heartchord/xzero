@@ -7,6 +7,16 @@
 
 KG_NAMESPACE_BEGIN(xzero)
 
+const char *g_pszBoolStrPairs[6] =
+{
+    "true", "false",
+    "1"   , "0"    ,
+    "yes" , "no"
+};
+
+const char *g_pszTrueStrList [3] = { "true" , "1", "yes" };
+const char *g_pszFalseStrList[3] = { "false", "0", "no"  };
+
 bool KG_Strncpy(char *pBuff, const char *pszStr, size_t uCount)
 {
     bool bResult = false;
